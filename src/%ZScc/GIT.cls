@@ -213,8 +213,9 @@ Method Commit(FileName As %String = "", Description As %String = "default commit
 	if ..Debug Write "Commiting to Repository  directory:"_p1_" filename:"_p2,!
 
 	Set tCmd=##class(%ZScc.GIT.Command).%New($lb(p1,p2))
+	Set tCmd.SubCommand="commit"
 	#; need ^ to escape for dos commands
-	Set tCmd.SubCommand="commit --author="""_$USERNAME_" ^<author@email.address.com^>"""
+	Do tCmd.Options.SetAt($USERNAME_" ^<dummy@localhost^>","--author")
 	Do tCmd.Options.SetAt(Description,"-m")
 
 	Set status=tCmd.Execute()
