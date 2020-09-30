@@ -6,8 +6,6 @@ Class %ZScc.Command Extends %Persistent
 /// Product name, e.g. VSS, ClearCase, CVS, etc..
 Parameter PRODUCT;
 
-Property GlobalOptions As array Of %String;
-
 Property Options As array Of %String;
 
 Property LocalWorkspace As %String(MAXLEN = 250);
@@ -136,11 +134,6 @@ Storage Default
 <Value>Debug</Value>
 </Value>
 </Data>
-<Data name="GlobalOptions">
-<Attribute>GlobalOptions</Attribute>
-<Structure>subnode</Structure>
-<Subscript>"GlobalOptions"</Subscript>
-</Data>
 <Data name="Options">
 <Attribute>Options</Attribute>
 <Structure>subnode</Structure>
@@ -148,7 +141,6 @@ Storage Default
 </Data>
 <DataLocation>^%ZScc.CommandD</DataLocation>
 <DefaultData>CommandDefaultData</DefaultData>
-<ExtentSize>100000</ExtentSize>
 <IdLocation>^%ZScc.CommandD</IdLocation>
 <IndexLocation>^%ZScc.CommandI</IndexLocation>
 <StreamLocation>^%ZScc.CommandS</StreamLocation>

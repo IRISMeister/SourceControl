@@ -135,6 +135,19 @@ Method InitDir(DirectoryName As %String = "", Repository As %String = "") As %St
 	$$$DUMPCOMMAND(tCmd.CommandString)
 	Do ..DumpOutput(tCmd.Result)
 
+	#; need these config settings as default
+	Set tCmd=##class(%ZScc.GIT.Command).%New($lb(p1,p2))
+	Set tCmd.SubCommand="config user.email xxx@yyy"
+	Do tCmd.Execute()
+	$$$DUMPCOMMAND(tCmd.CommandString)
+	Do ..DumpOutput(tCmd.Result)
+
+	Set tCmd=##class(%ZScc.GIT.Command).%New($lb(p1,p2))
+	Set tCmd.SubCommand="config user.name xxx"
+	Do tCmd.Execute()
+	$$$DUMPCOMMAND(tCmd.CommandString)
+	Do ..DumpOutput(tCmd.Result)
+
 	Quit $$$OK
 }
 
@@ -191,7 +204,7 @@ Method Add(FileName As %String = "", Description As %String = "") As %Status
 	Quit $$$OK
 }
 
-Method Commit(FileName As %String = "", Description As %String = "") As %Status
+Method Commit(FileName As %String = "", Description As %String = "default commit message") As %Status
 {
 	if ..Debug Write "Method 'Commit' FileName "_FileName_" Description:"_Description,!
 
@@ -200,11 +213,9 @@ Method Commit(FileName As %String = "", Description As %String = "") As %Status
 	if ..Debug Write "Commiting to Repository  directory:"_p1_" filename:"_p2,!
 
 	Set tCmd=##class(%ZScc.GIT.Command).%New($lb(p1,p2))
+	#; need ^ to escape for dos commands
 	Set tCmd.SubCommand="commit --author="""_$USERNAME_" ^<author@email.address.com^>"""
 	Do tCmd.Options.SetAt(Description,"-m")
-
-	#;Set x=$ZF(-1,"cd "_p1_" & git config --global user.email ""you@example.com""")
-	#;Set x=$ZF(-1,"cd "_p1_" & git config --global user.name """_$USERNAME_"""")
 
 	Set status=tCmd.Execute()
 	$$$DUMPCOMMAND(tCmd.CommandString)

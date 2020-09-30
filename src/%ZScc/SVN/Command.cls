@@ -20,11 +20,7 @@ Method Execute() As %Integer
 		set tCd="cd /D "_..LocalWorkspace
 		// this is windows only commands concatenation
 		set tCmd=tCmd_""""_tCd_" & "_..Command
-		// global options
-		// set i="" for  set i=$o(..GlobalOptions(i)) quit:i=""  set tCmd=tCmd_" "_i set:..GlobalOptions(i)'="" tCmd=tCmd_" "_$c(34)_..GlobalOptions(i)_$c(34)
-		set i="" for  set tGlobalOption=..GlobalOptions.GetNext(.i) quit:i=""  set tCmd=tCmd_" "_i set:tGlobalOption'="" tCmd=tCmd_" "_$c(34)_tGlobalOption_$c(34)
-		
-		
+
 		// subcommand
 		set:(..SubCommand'="") tCmd=tCmd_" "_..SubCommand
 		// subcommand options

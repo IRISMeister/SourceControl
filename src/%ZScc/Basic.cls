@@ -293,7 +293,7 @@ Method AddProjectItems() As %Status
 	//default projectは保存しない
 	If $E(..CurrentProjectName,1,$L($$$DEFAULTPRJNAME))=$$$DEFAULTPRJNAME {
 		Write $$$MSGNODEFAULTPRJ,!
-		Quit $$$OK
+		Quit '$$$OK
 	}
 
 	Set path=..LocalWorkspaceRoot_..GetExtraPath()

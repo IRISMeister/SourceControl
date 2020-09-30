@@ -20,15 +20,11 @@ Method Execute() As %Integer
 		set tCd="cd /D "_..LocalWorkspace
 		// this is windows only commands concatenation
 		set tCmd=tCmd_""""_tCd_" & "_..Command
-		// global options
-		// set i="" for  set i=$o(..GlobalOptions(i)) quit:i=""  set tCmd=tCmd_" "_i set:..GlobalOptions(i)'="" tCmd=tCmd_" "_$c(34)_..GlobalOptions(i)_$c(34)
-		set i="" for  set tGlobalOption=..GlobalOptions.GetNext(.i) quit:i=""  set tCmd=tCmd_" "_i set:tGlobalOption'="" tCmd=tCmd_" "_$c(34)_tGlobalOption_$c(34)
-		
 		
 		// subcommand
 		set:(..SubCommand'="") tCmd=tCmd_" "_..SubCommand
 		// subcommand options
-		set i="" for  set tOption=..Options.GetNext(.i) q:i=""  set tCmd=tCmd_" "_i set:tOption'="" tCmd=tCmd_" "_$s(tOption[" ":$c(34),1:"")_tOption_$s(tOption[" ":$c(34),1:"")
+		set i="" for  set tOption=..Options.GetNext(.i) q:i=""  set tCmd=tCmd_" "_i set:tOption'="" tCmd=tCmd_" "_$s($E(tOption)'=$c(34):$c(34),1:"")_tOption_$s($E(tOption)'=$C(34):$c(34),1:"")
 		// repository
 		set:(..Repository'="") tCmd=tCmd_" "_..Repository
 
