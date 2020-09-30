@@ -34,6 +34,7 @@ Method Execute() As %Integer
 		// repository
 		set:(..Repository'="") tCmd=tCmd_" "_..Repository
 
+		Set tCmd=tCmd_$C(34)
 		set ..CommandString=tCmd
 		//
 		$$$DEBUG("Command:"_tCmd)
