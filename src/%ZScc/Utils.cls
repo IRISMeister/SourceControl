@@ -265,7 +265,7 @@ ClassMethod CLImportAll()
 	Set instance=##class(%SYS.System).GetInstanceName()
 	Set indir=indir_"\"_instance_"\"_$NAMESPACE_"\"
 	If ##class(%File).Exists(indir) {
-		Do $SYSTEM.OBJ.ImportDir(indir,"*.mac;*.cls;*.xml","ck",.e,1,.imp)
+		Do $SYSTEM.OBJ.ImportDir(indir,"*.mac;*.cls;*.xml;*.inc","ck",.e,1,.imp)
 		zw e
 	}
 }

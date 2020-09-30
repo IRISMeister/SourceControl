@@ -90,7 +90,7 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 			If Answer'=$$$YES Quit $$$OK
 			Set dire=..GetLocalWorkspacePath()
 			If ##class(%File).Exists(dire) {
-				Do $SYSTEM.OBJ.ImportDir(dire,"*.mac;*.cls;*.xml","ck",.e,1)
+				Do $SYSTEM.OBJ.ImportDir(dire,"*.mac;*.cls;*.xml;*.inc","ck",.e,1)
 				zw e
 			}
 			Else { Quit '$$$OK }
