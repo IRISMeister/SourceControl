@@ -13,13 +13,19 @@ Method Execute() As %Integer
 	If ..Command="" { Set ..Command=..#MAINCOMMAND }
 
 	Set status=$$$OK   //by T.I  to provide quick error status to the caller  2012/10/16
-	set tCmd=$s($$$ISWINDOWS:"cmd /C ",$$$ISUNIX:"bash ",1:1)
-	set:..File="..xml" ..File="" set tSC=..%Save()
+	set:..File="..xml" ..File="" set tSC=..%Save() ; what?
+
 	try {
-		// windows only...
-		set tCd="cd /D "_..LocalWorkspace
-		// this is windows only commands concatenation
-		set tCmd=tCmd_""""_tCd_" & "_..Command
+		If $$$ISWINDOWS {
+			set tCmd="cmd /C "
+			set tCd="cd /D "_..LocalWorkspace
+			set tCmd=tCmd_""""_tCd_" & "_..Command
+		}
+		Else {
+			set tCmd="bash -c "
+			set tCd="cd "_..LocalWorkspace
+			set tCmd=tCmd_""""_tCd_" ; "_..Command
+		}
 		
 		// subcommand
 		set:(..SubCommand'="") tCmd=tCmd_" "_..SubCommand
