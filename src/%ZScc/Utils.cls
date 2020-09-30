@@ -50,6 +50,11 @@ ClassMethod GetItemType(InternalName As %String) As %String
 	Quit $ZCVT($P(InternalName,".",$L(InternalName,".")),"L")
 }
 
+ClassMethod GetItemName(InternalName As %String) As %String
+{
+	Quit $P(InternalName,".",1,$L(InternalName,".")-1)
+}
+
 ClassMethod SaveFormat(ItemType As %String) As %String
 {
 	Return $CASE(ItemType,
@@ -169,6 +174,10 @@ ClassMethod ExportSingleItem(InternalName As %String, path As %String, Debug) As
 	If 'Debug { Set qualifier=qualifier_"/nodisplaylog" }
 	
 	Set ItemType=##class(%ZScc.Utils).GetItemType(InternalName)
+	#; don't export BPL as BPL. 
+	If ItemType="bpl" {
+		Set InternalName=##class(%ZScc.Utils).GetItemName(InternalName)_".cls"
+	}
 
 	Set ext=##class(%ZScc.Utils).ExternalName(InternalName,path)
 	Set extName=##class(%ZScc.Utils).ExternalName(InternalName,"")
@@ -183,7 +192,7 @@ ClassMethod ExportSingleItem(InternalName As %String, path As %String, Debug) As
 
 ClassMethod IsEnsembleEnabled()
 {
-	If $D(^Ens.Config)'=0 { Return $$$YES }
+	If $D(^Ens.Configuration)'=0 { Return $$$YES }
 	Return $$$NO
 }
 
