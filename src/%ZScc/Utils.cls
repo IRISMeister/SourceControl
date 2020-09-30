@@ -76,7 +76,7 @@ ClassMethod ExportProjectItems(ProjectName As %String, Directory As %String = ""
  	Do rs.Execute(projectname)
  	While (rs.Next()) {
 		Set InternalName=rs.Data("Name")
-		#; only class lacks extension, so add it.
+		#; class lacks extension, so add it.
 		If $ZCVT(rs.Data("Type"),"L")="cls" Set InternalName=InternalName_".cls"
 		Set extName=##class(%ZScc.Utils).ExportSingleItem(InternalName,Directory,Debug)
  	}	
@@ -174,8 +174,8 @@ ClassMethod ExportSingleItem(InternalName As %String, path As %String, Debug) As
 	If 'Debug { Set qualifier=qualifier_"/nodisplaylog" }
 	
 	Set ItemType=##class(%ZScc.Utils).GetItemType(InternalName)
-	#; don't export BPL as BPL. 
-	If ItemType="bpl" {
+	#; don't export these items as is. 
+	If (ItemType="bpl")!(ItemType="dtl") {
 		Set InternalName=##class(%ZScc.Utils).GetItemName(InternalName)_".cls"
 	}
 
