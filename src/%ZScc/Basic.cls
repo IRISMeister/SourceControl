@@ -234,8 +234,9 @@ Method OnConnect()
 {
 	Set sts=##class(%File).DirectoryExists(..GetLocalWorkspacePath())
 	If 'sts {
-		If ..Debug w "Creating directory ",..GetLocalWorkspacePath(),!
-		Set x=$ZF(-1,$s($$$ISWINDOWS:"md",$$$ISUNIX:"mkdir -p",1:"md")_" "_..GetLocalWorkspacePath())
+		Set cmd=$s($$$ISWINDOWS:"md",$$$ISUNIX:"mkdir -p",1:"md")_" "_..GetLocalWorkspacePath()
+		If ..Debug w "Creating directory ",..GetLocalWorkspacePath(),!,cmd,!
+		Set x=$ZF(-1,cmd)
 		Quit $$$OK
 	}
 	else {
