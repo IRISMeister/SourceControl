@@ -1,4 +1,4 @@
-Include %ZScc.Constants
+Include (%sySite, %ZScc.Constants)
 
 /// SourceControlクラスの基底クラス<br/>
 /// 編集した対象をワークスペースにファイル出力する機能を提供。<br/>
@@ -234,9 +234,9 @@ Method OnConnect()
 {
 	Set sts=##class(%File).DirectoryExists(..GetLocalWorkspacePath())
 	If 'sts {
-		Set cmd=$s($$$ISWINDOWS:"md",$$$ISUNIX:"mkdir -p",1:"md")_" "_..GetLocalWorkspacePath()
-		If ..Debug w "Creating directory ",..GetLocalWorkspacePath(),!,cmd,!
-		Set x=$ZF(-1,cmd)
+		If ..Debug w "Creating directory ",..GetLocalWorkspacePath(),!
+		Set tSC=##class(%File).CreateDirectoryChain(..GetLocalWorkspacePath(),.ret)
+		If ..Debug w "Status:"_tSC,!
 		Quit $$$OK
 	}
 	else {
@@ -510,7 +510,8 @@ ClassMethod SampleSetup()
 {
 	Kill ^SYS("SourceControl",..#PRODUCT)
 	Set ^SYS("SourceControl",..#PRODUCT,"Debug")=0
-	Set ^SYS("SourceControl",..#PRODUCT,"LocalWorkspaceRoot")="\var\basic\work\"
+	If $$$ISWINDOWS { Set root="c:\var\basic\work\" } Else { Set root="/home/irisusr/basic/work/"}
+	Set ^SYS("SourceControl",..#PRODUCT,"LocalWorkspaceRoot")=root
 }
 
 }

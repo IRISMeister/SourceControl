@@ -215,7 +215,12 @@ Method Commit(FileName As %String = "", Description As %String = "default commit
 	Set tCmd=##class(%ZScc.GIT.Command).%New($lb(p1,p2))
 	Set tCmd.SubCommand="commit"
 	#; need ^ to escape for dos commands
-	Do tCmd.Options.SetAt($USERNAME_" ^<dummy@localhost^>","--author")
+	If $$$ISWINDOWS {
+		Do tCmd.Options.SetAt($USERNAME_" ^<dummy@localhost^>","--author")
+	}
+	Else {
+		Do tCmd.Options.SetAt($USERNAME_" <dummy@localhost>","--author")
+	}
 	Do tCmd.Options.SetAt(Description,"-m")
 
 	Set status=tCmd.Execute()
@@ -366,7 +371,9 @@ ClassMethod SampleSetup()
 {
 	Kill ^SYS("SourceControl",..#PRODUCT)
 	Set ^SYS("SourceControl",..#PRODUCT,"Debug")=0
-	Set ^SYS("SourceControl",..#PRODUCT,"LocalWorkspaceRoot")="\var\git\work\"
+
+	If $$$ISWINDOWS { Set root="c:\var\git\work\" } Else { Set root="/home/irisusr/git/work/"}
+	Set ^SYS("SourceControl",..#PRODUCT,"LocalWorkspaceRoot")=root
 	Set ^SYS("SourceControl",..#PRODUCT,"MainCommand")="git"
 	/*
 	Set ^SYS("SourceControl",..#PRODUCT,"RemotePassword")="xxxxx"

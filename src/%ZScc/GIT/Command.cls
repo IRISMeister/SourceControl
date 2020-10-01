@@ -24,7 +24,7 @@ Method Execute() As %Integer
 		Else {
 			set tCmd="bash -c "
 			set tCd="cd "_..LocalWorkspace
-			set tCmd=tCmd_""""_tCd_" ; "_..Command
+			set tCmd=tCmd_"'"_tCd_" ; "_..Command
 		}
 		
 		// subcommand
@@ -34,7 +34,13 @@ Method Execute() As %Integer
 		// repository
 		set:(..Repository'="") tCmd=tCmd_" "_..Repository
 
-		Set tCmd=tCmd_$C(34)
+		#; enclosing command text
+		If $$$ISWINDOWS {
+			Set tCmd=tCmd_$C(34)
+		}
+		Else {
+			Set tCmd=tCmd_"'"
+		}
 		set ..CommandString=tCmd
 		//
 		$$$DEBUG("Command:"_tCmd)
@@ -42,7 +48,8 @@ Method Execute() As %Integer
 		
 		// go and do it!
 		//open tCmd:("QR"):5 if '$test throw
-		open tCmd:("QRK\SJIS\"):5 if '$test throw
+		If $$$ISWINDOWS { Set mode="QRK\SJIS\" } Else { Set mode="QRK\UTF8\" }
+		open tCmd:(mode):5 if '$test throw
 		use tCmd
 		Set tEof=$system.Process.SetZEOF(1)
 		for j=1:1 q:$zeof  do

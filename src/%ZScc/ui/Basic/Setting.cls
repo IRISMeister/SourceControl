@@ -1,3 +1,5 @@
+Include %sySite
+
 Class %ZScc.ui.Basic.Setting Extends %CSP.Page
 {
 
@@ -22,8 +24,12 @@ ClassMethod OnPageBODY() As %Boolean
 	&HTML<<br/>>
 	&HTML<[設定例]>
 	&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","Debug")=0>
-	&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="c:\var\basic\work\">
-
+	If $$$ISWINDOWS {
+		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="c:\var\basic\work\">
+	}
+	Else {
+		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="/home/irisusr/basic/work/">
+	}
 	&HTML<</PRE>>
 	&HTML<設定例の値を使用するならボタンを押してください。押下後、スタジオを再起動してください。>
 	&HTML<<input id="btn" name="btn" type="button" value="設定例の値で初期化" onClick='onServer()'>>
