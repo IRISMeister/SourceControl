@@ -45,11 +45,13 @@ XData Menu
 Method OnConnect()
 {
 	Set tSC=##super()
+	/*
 	If $$$ISOK(tSC) {
 		#;これによりWORKがGITの管理対象になる(.gitフォルダが作成される)
 		If ..Debug w "initialize work folders",!
 		Do ..InitDir()
 	}
+	*/
 
 	#;Remote Repositoryへのリンクが既に存在するかどうかチェック。
 	#;無ければ何もしない
@@ -212,15 +214,9 @@ Method Commit(FileName As %String = "", Description As %String = "default commit
 	s p2=""
 	if ..Debug Write "Commiting to Repository  directory:"_p1_" filename:"_p2,!
 
+	Set gitmailaddr=$USERNAME_"@localhost"
 	Set tCmd=##class(%ZScc.GIT.Command).%New($lb(p1,p2))
-	Set tCmd.SubCommand="commit"
-	#; need ^ to escape for dos commands
-	If $$$ISWINDOWS {
-		Do tCmd.Options.SetAt($USERNAME_" ^<dummy@localhost^>","--author")
-	}
-	Else {
-		Do tCmd.Options.SetAt($USERNAME_" <dummy@localhost>","--author")
-	}
+	Set tCmd.SubCommand="-c user.name='"_$USERNAME_"' -c user.email='"_gitmailaddr_"' commit"
 	Do tCmd.Options.SetAt(Description,"-m")
 
 	Set status=tCmd.Execute()
@@ -372,7 +368,7 @@ ClassMethod SampleSetup()
 	Kill ^SYS("SourceControl",..#PRODUCT)
 	Set ^SYS("SourceControl",..#PRODUCT,"Debug")=0
 
-	If $$$ISWINDOWS { Set root="c:\var\git\work\" } Else { Set root="/home/irisusr/git/work/"}
+	If $$$ISWINDOWS { Set root="c:\var\git\" } Else { Set root="/home/irisusr/git/"}
 	Set ^SYS("SourceControl",..#PRODUCT,"LocalWorkspaceRoot")=root
 	Set ^SYS("SourceControl",..#PRODUCT,"MainCommand")="git"
 	/*

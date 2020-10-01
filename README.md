@@ -1,5 +1,6 @@
 # SourceControl
-WIP
+WIP.  
+DO NOT USE YET.
 
 ## How to install
 ```ObjectScript
@@ -10,3 +11,4 @@ $ iris session iris -U %SYS
 %SYS>h
 $
 ```
+

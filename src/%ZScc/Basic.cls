@@ -212,7 +212,6 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 			w "DebugMode:",..Debug,!
 			w "CurrentProjectName:",..CurrentProjectName,!
 			w "GetLocalWorkspacePath:",..GetLocalWorkspacePath(),!
-			w "GetLocalWorkspacePathConfig:",..GetLocalWorkspacePathConfig(),!
 			w "GetExtraPath:",..GetExtraPath(),!
 			w "GetRepositoryPath(..Branch):",..GetRepositoryPath(),!
 			w "<<<End of dump>>>",!
@@ -232,15 +231,15 @@ done
 
 Method OnConnect()
 {
-	Set sts=##class(%File).DirectoryExists(..GetLocalWorkspacePath())
+	Set sts=##class(%File).DirectoryExists(..LocalWorkspaceRoot)
 	If 'sts {
-		If ..Debug w "Creating directory ",..GetLocalWorkspacePath(),!
-		Set tSC=##class(%File).CreateDirectoryChain(..GetLocalWorkspacePath(),.ret)
+		If ..Debug w "Creating directory ",..LocalWorkspaceRoot,!
+		Set tSC=##class(%File).CreateDirectoryChain(..LocalWorkspaceRoot,.ret)
 		If ..Debug w "Status:"_tSC,!
 		Quit $$$OK
 	}
 	else {
-		If ..Debug w "Directory ",..GetLocalWorkspacePath()," Already exist",!
+		If ..Debug w "Directory ",..LocalWorkspaceRoot," Already exist",!
 		Quit '$$$OK
 	}
 }
@@ -251,7 +250,12 @@ Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NU
 	//DBへの保存は成功させたいのでOKを返す
 	If '..IsInitialized  Quit $$$OK
 
-	//default projectは保存しない
+	//default projectへの登録アイテムは保存しない
+	If $E(..CurrentProjectName,1,$L($$$DEFAULTPRJNAME))=$$$DEFAULTPRJNAME {
+		Write $$$MSGNODEFAULTPRJ,!
+		Quit $$$OK
+	}
+	//default project自体は保存しない
 	If $E(InternalName,1,$L($$$DEFAULTPRJNAME))=$$$DEFAULTPRJNAME {
 		Write $$$MSGNODEFAULTPRJ,!
 		Quit $$$OK
@@ -395,19 +399,14 @@ Method TranslateMenuNameToMenuID(Name As %String, ByRef DisplayName As %String) 
 
 Method GetExtraPath() As %String
 {
-	Quit ..ConfigName_$$$FolderDelimiter_$NAMESPACE_$$$FolderDelimiter
+	//Quit ..ConfigName_$$$FolderDelimiter_$NAMESPACE_$$$FolderDelimiter
+	Quit $P(..CurrentProjectName,".PRJ",1)_$$$FolderDelimiter_"src"_$$$FolderDelimiter
 }
 
 /// accessor method for LocalWorspacePath property
 Method GetLocalWorkspacePath(Branch As %String = "") As %String
 {
 	set tPath=..LocalWorkspaceRoot_..GetExtraPath()
-	Quit tPath
-}
-
-Method GetLocalWorkspacePathConfig() As %String
-{
-	set tPath=..LocalWorkspaceRoot_..ConfigName_$$$FolderDelimiter
 	Quit tPath
 }
 
@@ -510,7 +509,7 @@ ClassMethod SampleSetup()
 {
 	Kill ^SYS("SourceControl",..#PRODUCT)
 	Set ^SYS("SourceControl",..#PRODUCT,"Debug")=0
-	If $$$ISWINDOWS { Set root="c:\var\basic\work\" } Else { Set root="/home/irisusr/basic/work/"}
+	If $$$ISWINDOWS { Set root="c:\var\basic\" } Else { Set root="/home/irisusr/basic/"}
 	Set ^SYS("SourceControl",..#PRODUCT,"LocalWorkspaceRoot")=root
 }
 

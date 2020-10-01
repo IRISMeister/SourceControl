@@ -28,10 +28,10 @@ ClassMethod OnPageBODY() As %Boolean
 	&HTML<[設定例]>
 
 	If $$$ISWINDOWS {
-		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="c:\var\git\work\">
+		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="c:\var\git\">
 	}
 	Else {
-		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="/home/irisusr/git/work/">
+		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="/home/irisusr/git/">
 	}
 	&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","MainCommand")="git">
 	/*

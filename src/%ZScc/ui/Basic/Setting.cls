@@ -25,10 +25,10 @@ ClassMethod OnPageBODY() As %Boolean
 	&HTML<[設定例]>
 	&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","Debug")=0>
 	If $$$ISWINDOWS {
-		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="c:\var\basic\work\">
+		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="c:\var\basic\">
 	}
 	Else {
-		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="/home/irisusr/basic/work/">
+		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="/home/irisusr/basic/">
 	}
 	&HTML<</PRE>>
 	&HTML<設定例の値を使用するならボタンを押してください。押下後、スタジオを再起動してください。>
