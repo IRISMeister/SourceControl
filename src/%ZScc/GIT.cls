@@ -45,29 +45,40 @@ XData Menu
 Method OnConnect()
 {
 	Set tSC=##super()
-	/*
-	If $$$ISOK(tSC) {
+#if 0
+	// この時点ではProjectNameは取得できていないので、InitDir()はroot\\srcに作成してしまうためコメントアウト中。
+	//下記の流れなので、１回目のPRJに対するOnBeforeLoad()を使えるかも？
+	//IsAutoCommitOn=1
+	//IsAutoCreateRepoOn=1
+	//Checking root work directory since this is the first connect by this studio instance.
+	//Directory C:\Users\xxx\git\ Already exist
+	//Method 'OnBeforeLoad' InternalName:Project2.PRJ
+	//Method 'UserAction' Type:1 Name:3 InternalName:Project2.PRJ SelectedText: Action: Target: Msg: Reload:0
+	//Method 'UserAction' Type:1 Name:3 InternalName:Demo.Process.NewProcess2.BPL SelectedText: Action: Target: Msg: Reload:0
+	//Method 'OnBeforeLoad' InternalName:Demo.Process.NewProcess2.BPL
+
+	If ..IsAutoCreateRepoOn {
 		#;これによりWORKがGITの管理対象になる(.gitフォルダが作成される)
 		If ..Debug w "initialize work folders",!
 		Do ..InitDir()
 	}
-	*/
 
 	#;Remote Repositoryへのリンクが既に存在するかどうかチェック。
 	#;無ければ何もしない
-	If ..GetRepositoryPath()'="" {
-		Set sts=..CheckRepository(..GetRepositoryPath())
+	If ..GetRemoteRepositoryPath()'="" {
+		Set sts=..CheckRemoteRepository(..GetRemoteRepositoryPath())
 		if sts=$$$OK {
-			If ..Debug w "Remote Repository ",..GetRepositoryPath()," already linked",!
+			If ..Debug w "Remote Repository ",..GetRemoteRepositoryPath()," already linked",!
 		}
 		else {
 			w " ***************************************************************************************",!
 			w " Adding remote repository by calling 'git remote add origin url'",!		
-			w " Remote repository is ",..GetRepositoryPath(),!		
+			w " Remote repository is ",..GetRemoteRepositoryPath(),!		
 			w " ***************************************************************************************",!
-			Do ..LinkToRepository(..GetRepositoryPath())
+			Do ..LinkToRepository(..GetRemoteRepositoryPath())
 		}
 	}
+#endif
 }
 
 Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NULLOREF}) As %Status
@@ -299,7 +310,14 @@ Method GetRepositoryPath() As %String
 	Quit $translate(tPath,$$$FolderDelimiter,$$$URLDelimiter)
 }
 
-Method CheckRepository(Repository As %String) As %Integer
+Method GetRemoteRepositoryPath() As %String
+{
+	If ..RepositoryRoot="" Quit ""
+	set tPath=$ZCVT(..RepositoryRoot_..RemoteUser_"/"_..GetGitProjectName()_".git","L")
+	Quit $translate(tPath,$$$FolderDelimiter,$$$URLDelimiter)
+}
+
+Method CheckRemoteRepository(Repository As %String) As %Integer
 {
 	#; check if specified remote repository exists and linked
 	#; C:\Users\iwamoto\git\iris-shell2docker>git config --get remote.origin.url
@@ -349,7 +367,8 @@ Method AddProjectItems() As %Status
 	If $$$ISERR(tSC) { Quit tSC}
 
 	Do ..Add("*")
-	Do ..Commit("","commited by AddProjectItems")
+	If ..IsAutoCommitOn Do ..Commit("","commited by AddProjectItems")
+
 	Quit $$$OK
 }
 
@@ -359,7 +378,7 @@ Method AddNameSpaceItems() As %Status
 	If $$$ISERR(tSC) { Quit tSC}
 
 	Do ..Add("*")
-	Do ..Commit("","commited by AddNameSpaceItems.")
+	If ..IsAutoCommitOn Do ..Commit("","commited by AddNameSpaceItems.")
 	Quit $$$OK
 }
 
@@ -368,9 +387,12 @@ ClassMethod SampleSetup()
 	Kill ^SYS("SourceControl",..#PRODUCT)
 	Set ^SYS("SourceControl",..#PRODUCT,"Debug")=0
 
-	If $$$ISWINDOWS { Set root="c:\var\git\" } Else { Set root="/home/irisusr/git/"}
+	If $$$ISWINDOWS { Set root="C:\Users\YourOSUserName\git\" } Else { Set root="/home/irisusr/git/"}
 	Set ^SYS("SourceControl",..#PRODUCT,"LocalWorkspaceRoot")=root
 	Set ^SYS("SourceControl",..#PRODUCT,"MainCommand")="git"
+	Set ^SYS("SourceControl",..#PRODUCT,"AutoCreateRepo")=0
+	Set ^SYS("SourceControl",..#PRODUCT,"AutoCommit")=0
+	
 	/*
 	Set ^SYS("SourceControl",..#PRODUCT,"RemotePassword")="xxxxx"
 	Set ^SYS("SourceControl",..#PRODUCT,"RemoteUser")="xxxx"

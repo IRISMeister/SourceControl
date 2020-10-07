@@ -29,7 +29,10 @@ Parameter PRODUCT = "Basic";
 Property IsInitialized As %Boolean [ Calculated ];
 
 /// 自動commitは有効か？
-Property IsAutoCommitOn As %Boolean [ InitialExpression = 1 ];
+Property IsAutoCommitOn As %Boolean [ InitialExpression = 0 ];
+
+/// 自動Repo作成は有効か？
+Property IsAutoCreateRepoOn As %Boolean [ InitialExpression = 0 ];
 
 /// ShowCommandは有効か？
 Property IsShowCommandOn As %Boolean [ InitialExpression = 0 ];
@@ -112,7 +115,13 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 		Set ..Debug=..IsDebugEnabled()
 		If ..Debug { set ..IsShowCommandOn=1 }
 
-		If ..Debug Write "Checking Repository/workdirectory since this is the first connect by this studio instance.",!
+		Set ..IsAutoCommitOn=..IsAutoCommitOn()
+		If ..Debug { Write "IsAutoCommitOn="_..IsAutoCommitOn,! }
+
+		Set ..IsAutoCreateRepoOn=..IsAutoCreateRepoOn()
+		If ..Debug { Write "IsAutoCreateRepoOn="_..IsAutoCreateRepoOn,! }
+
+		If ..Debug Write "Checking root work directory since this is the first connect by this studio instance.",!
 
 		#; PRODUCT specific logic here
 		Do ..OnConnect()
@@ -334,24 +343,39 @@ Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As 
 		If menuid'="settings" Set Enabled=0
 	}
 	If menuid="commiton" {
-		If ..IsAutoCommitOn Set Enabled=0
-		Else  Set Enabled=1
+		If '..IsInitialized { Set Enabled=0 }
+		Else {
+			If ..IsAutoCommitOn Set Enabled=0
+			Else  Set Enabled=1
+		}
 	}	
 	ElseIf menuid="commitoff" {
-		If ..IsAutoCommitOn Set Enabled=1
-		Else  Set Enabled=0
+		If '..IsInitialized { Set Enabled=0 }
+		Else {
+			If ..IsAutoCommitOn Set Enabled=1
+			Else  Set Enabled=0
+		}
 	}	
 	ElseIf menuid="commit" {
-		If ..IsAutoCommitOn Set Enabled=0
-		Else  Set Enabled=1
+		If '..IsInitialized { Set Enabled=0 }
+		Else {
+			If ..IsAutoCommitOn Set Enabled=0
+			Else  Set Enabled=1
+		}
 	}	
 	ElseIf menuid="showcmdon" {
-		If ..IsShowCommandOn Set Enabled=0
-		Else  Set Enabled=1
+		If '..IsInitialized { Set Enabled=0 }
+		Else {
+			If ..IsShowCommandOn Set Enabled=0
+			Else  Set Enabled=1
+		}
 	}	
 	ElseIf menuid="showcmdoff" {
-		If ..IsShowCommandOn Set Enabled=1
-		Else  Set Enabled=0
+		If '..IsInitialized { Set Enabled=0 }
+		Else {
+			If ..IsShowCommandOn Set Enabled=1
+			Else  Set Enabled=0
+		}
 	}	
 	ElseIf menuid="pull" {
 		If ..RepositoryRoot'="" Set Enabled=1
@@ -415,6 +439,11 @@ Method GetRepositoryPath() As %String
 	Quit ""
 }
 
+Method GetRemoteRepositoryPath() As %String
+{
+	Quit ""
+}
+
 Method CreateInitialRepositoryDir() As %Status
 {
 	Quit $$$OK
@@ -460,9 +489,24 @@ Method CheckRepository(Repository As %String) As %Integer
 	Quit $$$OK
 }
 
+Method CheckRemoteRepository(Repository As %String) As %Integer
+{
+	Quit $$$OK
+}
+
 ClassMethod IsDebugEnabled() As %Boolean
 {
 	Quit +$g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"Debug"))=1
+}
+
+ClassMethod IsAutoCreateRepoOn() As %Boolean
+{
+	Quit +$g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"AutoCreateRepo"))=1
+}
+
+ClassMethod IsAutoCommitOn() As %Boolean
+{
+	Quit +$g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"AutoCommit"))=1
 }
 
 Method LocalWorkspaceRootGet() As %String
