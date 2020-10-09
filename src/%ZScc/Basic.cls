@@ -271,7 +271,7 @@ Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NU
 		Quit $$$OK
 	}	
 
-	Set path=..LocalWorkspaceRoot_..GetExtraPath()
+	Set path=..GetLocalWorkspacePath()
 	Set ..ExternalName=##class(%ZScc.Utils).ExportSingleItem(InternalName,path,..Debug)
 
 	Quit $$$OK
@@ -311,7 +311,7 @@ Method AddProjectItems() As %Status
 		Quit '$$$OK
 	}
 
-	Set path=..LocalWorkspaceRoot_..GetExtraPath()
+	Set path=..GetLocalWorkspacePath()
 	Set tSC=##class(%ZScc.Utils).ExportProjectItems(..CurrentProjectName,path,..Debug)
 
 	Quit tSC
@@ -322,7 +322,7 @@ Method AddNameSpaceItems() As %Status
 	if ..Debug Write "AddNameSpaceItems.  Target:",$NAMESPACE,!
 	If '..IsInitialized  Quit '$$$OK
 	
-	Set path=..LocalWorkspaceRoot_..GetExtraPath()
+	Set path=..GetLocalWorkspacePath()
 	Do ##class(%ZScc.Utils).ExportAllItems(path,..Debug)
 	Quit $$$OK
 }
