@@ -221,6 +221,7 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 			w "DebugMode:",..Debug,!
 			w "CurrentProjectName:",..CurrentProjectName,!
 			w "GetLocalWorkspacePath:",..GetLocalWorkspacePath(),!
+			w "GetLocalWorkspaceSrcPath:",..GetLocalWorkspaceSrcPath(),!
 			w "GetExtraPath:",..GetExtraPath(),!
 			w "GetRepositoryPath(..Branch):",..GetRepositoryPath(),!
 			w "<<<End of dump>>>",!
@@ -294,7 +295,7 @@ Method OnBeforeLoad(InternalName As %String) As %Status
 	If ..Debug Write "Method 'OnBeforeLoad' InternalName:"_InternalName,!
 
 	Set tType=##class(%ZScc.Utils).GetItemType(InternalName)
-	If ##class(%ZScc.Utils).ItemCategory(tType)="project" Set ..CurrentProjectName=InternalName
+	If ##class(%ZScc.Utils).ItemCategory(tType)="project" Set ..CurrentProjectName=$P(InternalName,".PRJ",1)
 
 	Quit $$$OK
 }
@@ -424,13 +425,19 @@ Method TranslateMenuNameToMenuID(Name As %String, ByRef DisplayName As %String) 
 Method GetExtraPath() As %String
 {
 	//Quit ..ConfigName_$$$FolderDelimiter_$NAMESPACE_$$$FolderDelimiter
-	Quit $P(..CurrentProjectName,".PRJ",1)_$$$FolderDelimiter_"src"_$$$FolderDelimiter
+	Quit ..CurrentProjectName_$$$FolderDelimiter_"src"_$$$FolderDelimiter
 }
 
-/// accessor method for LocalWorspacePath property
 Method GetLocalWorkspacePath(Branch As %String = "") As %String
 {
 	set tPath=..LocalWorkspaceRoot_..GetExtraPath()
+	Quit tPath
+}
+
+/// accessor method for LocalWorspacePath property
+Method GetLocalWorkspaceSrcPath(Branch As %String = "") As %String
+{
+	set tPath=..LocalWorkspaceRoot_..CurrentProjectName
 	Quit tPath
 }
 
