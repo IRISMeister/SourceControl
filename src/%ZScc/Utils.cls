@@ -187,8 +187,7 @@ ClassMethod ExportSingleItem(InternalName As %String, path As %String, Debug) As
 	Else {
 		Do $System.OBJ.ExportUDL(InternalName,ext,qualifier)
 	}	
-	Quit ext
-	;Quit extName
+	Quit extName
 }
 
 ClassMethod IsEnsembleEnabled()

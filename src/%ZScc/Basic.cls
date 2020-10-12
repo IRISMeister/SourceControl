@@ -258,7 +258,7 @@ Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NU
 	}	
 
 	Set path=..GetLocalWorkspacePath()
-	Set ..ExternalName=##class(%ZScc.Utils).ExportSingleItem(InternalName,path,..Debug)
+	Set ..ExternalName=..Src_$$$FolderDelimiter_##class(%ZScc.Utils).ExportSingleItem(InternalName,path,..Debug)
 
 	Quit $$$OK
 }

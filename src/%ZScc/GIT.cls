@@ -56,7 +56,7 @@ Method OnBeforeLoad(InternalName As %String) As %Status
 	If ##class(%ZScc.Utils).ItemCategory(tType)="project" {
 #if 1		
 		If ..IsAutoCreateRepoOn {
-			if '##class(%File).Exists(..LocalWorkspaceRoot_..CurrentProjectName_"\.git") {
+			if '##class(%File).Exists(..LocalWorkspaceRoot_..CurrentProjectName_$$$FolderDelimiter_".git") {
 				#;これによりWORKがGITの管理対象になる(.gitフォルダが作成される)
 				Do ..InitDir()
 
@@ -406,7 +406,7 @@ ClassMethod SampleSetup()
 	Set ^SYS("SourceControl",..#PRODUCT,"MainCommand")="git"
 	Set ^SYS("SourceControl",..#PRODUCT,"AutoCreateRepo")=0
 	Set ^SYS("SourceControl",..#PRODUCT,"AutoCommit")=0
-	
+	Set ^SYS("SourceControl",..#PRODUCT,"Src")="src"
 	/*
 	Set ^SYS("SourceControl",..#PRODUCT,"RemotePassword")="xxxxx"
 	Set ^SYS("SourceControl",..#PRODUCT,"RemoteUser")="xxxx"
