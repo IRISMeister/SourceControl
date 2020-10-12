@@ -90,9 +90,10 @@ Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NU
 		Return $$$OK 
 	}
 	Do ##super(InternalName,Object)
-	#; super()が何もファイル出力しなければ、下記はgitにより無視される。
-	Do ..Add(..ExternalName)
-	If ..IsAutoCommitOn Do ..Commit(..ExternalName,"auto commited")
+	If ..ExternalName'="" {
+		Do ..Add(..ExternalName)
+		If ..IsAutoCommitOn Do ..Commit(..ExternalName,"auto commited")
+	}
 
 	Return $$$OK
 }
@@ -215,6 +216,7 @@ Method CheckOut2(DirectoryName As %String = "", Branch As %String = "") As %Stat
 Method Add(FileName As %String = "", Description As %String = "") As %Status
 {
 	if ..Debug Write "Method 'Add' FileName "_FileName_" Description:"_Description,!
+	If FileName="" Quit $$$OK
 
 	Set p1=..GetLocalWorkspaceProjectPath()
 	Set p2=FileName
