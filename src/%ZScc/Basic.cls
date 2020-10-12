@@ -553,6 +553,7 @@ ClassMethod SampleSetup()
 	Set ^SYS("SourceControl",..#PRODUCT,"Debug")=0
 	If $$$ISWINDOWS { Set root="c:\var\basic\" } Else { Set root="/home/irisusr/basic/"}
 	Set ^SYS("SourceControl",..#PRODUCT,"LocalWorkspaceRoot")=root
+	Set ^SYS("SourceControl",..#PRODUCT,"Src")="src"
 }
 
 }
