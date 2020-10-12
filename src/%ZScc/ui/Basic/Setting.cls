@@ -19,6 +19,7 @@ ClassMethod OnPageBODY() As %Boolean
 	&HTML<<PRE>>
 	&HTML<下記のグローバルを対象ネームスペース上に手動で設定してください。>
 	&HTML<^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")>
+	&HTML<^SYS("SourceControl","#(..#PRODUCT)#","Src")>
 
 
 	&HTML<<br/>>
@@ -30,6 +31,7 @@ ClassMethod OnPageBODY() As %Boolean
 	Else {
 		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="/home/irisusr/basic/">
 	}
+	&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","Src")="src">
 	&HTML<</PRE>>
 	&HTML<設定例の値を使用するならボタンを押してください。押下後、スタジオを再起動してください。>
 	&HTML<<input id="btn" name="btn" type="button" value="設定例の値で初期化" onClick='onServer()'>>

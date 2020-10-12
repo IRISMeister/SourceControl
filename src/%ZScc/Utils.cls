@@ -166,7 +166,7 @@ ClassMethod ExportAllCSP(cspdir As %String, Directory As %String, Debug)
 ClassMethod ExportSingleItem(InternalName As %String, path As %String, Debug) As %String
 {
 	If Debug { 
-		w "InternalName:",InternalName,!
+		w "Method 'ExportSingleItem' InternalName:"_InternalName_" path: "_path,!
 		w "ExternalName:",##class(%ZScc.Utils).ExternalName(InternalName,path),!
 	} 
 	
@@ -187,7 +187,8 @@ ClassMethod ExportSingleItem(InternalName As %String, path As %String, Debug) As
 	Else {
 		Do $System.OBJ.ExportUDL(InternalName,ext,qualifier)
 	}	
-	Quit extName
+	Quit ext
+	;Quit extName
 }
 
 ClassMethod IsEnsembleEnabled()

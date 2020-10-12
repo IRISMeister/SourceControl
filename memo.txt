@@ -1,18 +1,17 @@
 LocalWorkspaceRoot      F:\ISJ\Development\git\
 GetLocalWorkspacePath   F:\ISJ\Development\git\ + ProjectName + src?
 
-OnConnect()時にProjectNameが取得できないと難しい。→無理
-BASIC:OnConnect()はLocalWorkspaceRootの存在チェックにとどめる。
-
-GIT:OnConnect()はgit初期化(InitDir)しない->オプション化を検討。タイミングが難しい。
 
 前提:
 git init済みのvscodeライクなワークディレクトリが存在することを前提とする
 典型例は
-F:\ISJ\Development\git\sample  ここに.gitフォルダがある(git init)
-F:\ISJ\Development\git\sample\src  ここにIRIS関連ファイルがある
+ProjectName:Project1
+F:\ISJ\Development\git\Project1  ここに.gitフォルダがある(git init)
+F:\ISJ\Development\git\Project1\src  ここにIRIS関連ファイルがある
 
-下記のCommit命令を実行
+
+Studioオープン時、NS切り替え時、Project開き直し時に、git initされてるかチェックしてされてなければ(かつCreateRepoがONなら)するように変更。
+
+Commit命令は下記を実行
 git -c user.name=$USERNAME -c user.email='$USERNAME@localhost' commit -m "auto commited"
 
-ToDo: Linuxでの動作を確認

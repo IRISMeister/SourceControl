@@ -1,25 +1,5 @@
 Include (%sySite, %ZScc.Constants)
 
-/// SourceControlクラスの基底クラス<br/>
-/// 編集した対象をワークスペースにファイル出力する機能を提供。<br/>
-/// ソース管理クラスとしては、サブクラスを使用すること。<br/>
-/// ワークディレクトリを複数ユーザで共有し、ユーザ別に維持・管理しようとすると
-/// <li>全員が別個のCache'アカウントを使用しないといけない</li>
-/// <li>プロジェクトは個々のアイテムへのリンク情報であり、別々のプロジェクトに属するアイテムが同一である可能性がある</li>
-/// <li>プロジェクトの排他の方法や同期の方法が加わるとソース管理の処理事態が複雑になってしまう</li>
-/// 等の制約が加わる。むしろ、ソース管理は単一の利用者に閉じて使用するほうが良いと判断。
-/// プロジェクトファイルは(prj拡張子を持つ)アイテムの一つとして管理される。
-/// 排他はStudioが持つ編集対象(ルーチン等)を排他する仕組みを利用することにした。
-/// この機能により、Aが編集中にBが同じ対象を編集することはあり得ない。
-/// よって、ワーク、リポジトリの構造はRoot/インスタンス名/ネームスペース名/xxxx
-/// というシンプルなもの(構造に$UsernameやProject名を含めない)となった。<br/>
-/// 実行には、各ネームスペースに下記の^SYSグローバルが必要。
-/// <PRE>
-/// 設定例
-/// USER>zw ^SYS
-/// ^SYS("SourceControl","Basic","Debug")=1   <==任意。Studio結果WindowにDebug情報を出力。
-/// ^SYS("SourceControl","Basic","LocalWorkspaceRoot")="\var\Basic\work\"
-/// </PRE>
 Class %ZScc.Basic Extends %Studio.SourceControl.Base
 {
 
@@ -29,10 +9,10 @@ Parameter PRODUCT = "Basic";
 Property IsInitialized As %Boolean [ Calculated ];
 
 /// 自動commitは有効か？
-Property IsAutoCommitOn As %Boolean [ InitialExpression = 0 ];
+Property IsAutoCommitOn As %Boolean [ Calculated ];
 
 /// 自動Repo作成は有効か？
-Property IsAutoCreateRepoOn As %Boolean [ InitialExpression = 0 ];
+Property IsAutoCreateRepoOn As %Boolean [ Calculated ];
 
 /// ShowCommandは有効か？
 Property IsShowCommandOn As %Boolean [ InitialExpression = 0 ];
@@ -48,16 +28,17 @@ Property ExternalName As %String;
 
 Property LocalWorkspaceRoot As %String [ Calculated ];
 
-Property RepositoryRoot As %String [ Calculated ];
+Property RemoteRepository As %String [ Calculated ];
 
-/// this indicates the branch name, default is trunk
-Property Branch As %String [ InitialExpression = "trunk" ];
+Property Branch As %String [ InitialExpression = "master" ];
 
 Property RemoteUser As %String [ Calculated ];
 
 Property RemotePassword As %String [ Calculated ];
 
-Property Debug As %Boolean [ InitialExpression = 0 ];
+Property Debug As %Boolean [ Calculated ];
+
+Property Src As %String [ Calculated ];
 
 Parameter USERACTIONNAME = "tried to change a document that is locked in source control;created a new document;deleted a document;opened a document;closed a document;connected to a new namespace";
 
@@ -111,18 +92,12 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 				Quit $$$OK
 		}
 
-		#;debugフラグを初期化する
-		Set ..Debug=..IsDebugEnabled()
-		If ..Debug { set ..IsShowCommandOn=1 }
-
-		Set ..IsAutoCommitOn=..IsAutoCommitOn()
-		If ..Debug { Write "IsAutoCommitOn="_..IsAutoCommitOn,! }
-
-		Set ..IsAutoCreateRepoOn=..IsAutoCreateRepoOn()
-		If ..Debug { Write "IsAutoCreateRepoOn="_..IsAutoCreateRepoOn,! }
-
-		If ..Debug Write "Checking root work directory since this is the first connect by this studio instance.",!
-
+		If ..Debug { 
+			Set ..IsShowCommandOn=1 
+			Write "IsAutoCommitOn="_..IsAutoCommitOn,!
+			Write "IsAutoCreateRepoOn="_..IsAutoCreateRepoOn,!
+			Write "Checking root work directory since this is the first connect by this studio instance.",!
+		}
 		#; PRODUCT specific logic here
 		Do ..OnConnect()
 	}
@@ -214,16 +189,22 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 			w "<<<dumping object...>>>",!
 			Do $SYSTEM.OBJ.Dump($this)
 			w "<<<dumping settings...>>>",!
-			w "ConfigName:",..ConfigName,!
-			w "IsInitialized:",..IsInitialized,!
-			w "LocalWorkspaceRoot:",..LocalWorkspaceRoot,!
-			w "RepositoryRoot:",..RepositoryRoot,!
-			w "DebugMode:",..Debug,!
-			w "CurrentProjectName:",..CurrentProjectName,!
-			w "GetLocalWorkspacePath:",..GetLocalWorkspacePath(),!
-			w "GetLocalWorkspaceSrcPath:",..GetLocalWorkspaceSrcPath(),!
-			w "GetExtraPath:",..GetExtraPath(),!
-			w "GetRepositoryPath(..Branch):",..GetRepositoryPath(),!
+			w "ConfigName: ",..ConfigName,!
+			w "Debug: ",..Debug,!
+			w "IsAutoCommitOn: ",..IsAutoCommitOn,!
+			w "IsAutoCreateRepoOn: ",..IsAutoCreateRepoOn,!
+			w "IsInitialized: ",..IsInitialized,!
+			w "LocalWorkspaceRoot: ",..LocalWorkspaceRoot,!
+			w "RemotePassword: ",..RemotePassword,!
+			w "RemoteUser: ",..RemoteUser,!
+			w "RemoteRepository: ",..RemoteRepository,!
+			w "Src: ",..Src,!
+
+			w "CurrentProjectName: ",..CurrentProjectName,!
+			w "GetLocalWorkspacePath(): ",..GetLocalWorkspacePath(),!
+			w "GetLocalWorkspaceProjectPath(): ",..GetLocalWorkspaceProjectPath(),!
+			w "GetExtraPath(): ",..GetExtraPath(),!
+			w "GetRepositoryPath(): ",..GetRepositoryPath(),!
 			w "<<<End of dump>>>",!
 
 			set Action=$$$ACTIONDONOTHING
@@ -256,9 +237,15 @@ Method OnConnect()
 
 Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NULLOREF}) As %Status
 {
-	if ..Debug Write "Method 'OnAfterSave' InternalName:"_InternalName_" Object: "_Object,!
+	if ..Debug Write "Method 'OnAfterSave(Basic)' InternalName:"_InternalName_" Object: "_Object,!
 	//DBへの保存は成功させたいのでOKを返す
 	If '..IsInitialized  Quit $$$OK
+
+	//project保存の際、現在のCurrentProjectPathと一致しない場合は保存しない
+	//Projectを「名前を付けて保存」した際に発生
+	If ##class(%ZScc.Utils).GetItemName(InternalName)'=..CurrentProjectName {
+		Quit $$$OK
+	}	
 
 	//default projectへの登録アイテムは保存しない
 	If $E(..CurrentProjectName,1,$L($$$DEFAULTPRJNAME))=$$$DEFAULTPRJNAME {
@@ -267,7 +254,6 @@ Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NU
 	}
 	//default project自体は保存しない
 	If $E(InternalName,1,$L($$$DEFAULTPRJNAME))=$$$DEFAULTPRJNAME {
-		Write $$$MSGNODEFAULTPRJ,!
 		Quit $$$OK
 	}	
 
@@ -292,7 +278,7 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 /// to load the item from an external format.
 Method OnBeforeLoad(InternalName As %String) As %Status
 {
-	If ..Debug Write "Method 'OnBeforeLoad' InternalName:"_InternalName,!
+	If ..Debug Write "Method 'OnBeforeLoad(Basic)' InternalName:"_InternalName,!
 
 	Set tType=##class(%ZScc.Utils).GetItemType(InternalName)
 	If ##class(%ZScc.Utils).ItemCategory(tType)="project" Set ..CurrentProjectName=$P(InternalName,".PRJ",1)
@@ -379,11 +365,11 @@ Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As 
 		}
 	}	
 	ElseIf menuid="pull" {
-		If ..RepositoryRoot'="" Set Enabled=1
+		If ..RemoteRepository'="" Set Enabled=1
 		Else  Set Enabled=0
 	}	
 	ElseIf menuid="push" {
-		If ..RepositoryRoot'="" Set Enabled=1
+		If ..RemoteRepository'="" Set Enabled=1
 		Else  Set Enabled=0
 	}	
 	
@@ -425,17 +411,17 @@ Method TranslateMenuNameToMenuID(Name As %String, ByRef DisplayName As %String) 
 Method GetExtraPath() As %String
 {
 	//Quit ..ConfigName_$$$FolderDelimiter_$NAMESPACE_$$$FolderDelimiter
-	Quit ..CurrentProjectName_$$$FolderDelimiter_"src"_$$$FolderDelimiter
+	Quit ..CurrentProjectName_$$$FolderDelimiter_..Src_$$$FolderDelimiter
 }
 
-Method GetLocalWorkspacePath(Branch As %String = "") As %String
+Method GetLocalWorkspacePath() As %String
 {
 	set tPath=..LocalWorkspaceRoot_..GetExtraPath()
 	Quit tPath
 }
 
 /// accessor method for LocalWorspacePath property
-Method GetLocalWorkspaceSrcPath(Branch As %String = "") As %String
+Method GetLocalWorkspaceProjectPath() As %String
 {
 	set tPath=..LocalWorkspaceRoot_..CurrentProjectName
 	Quit tPath
@@ -501,17 +487,12 @@ Method CheckRemoteRepository(Repository As %String) As %Integer
 	Quit $$$OK
 }
 
-ClassMethod IsDebugEnabled() As %Boolean
-{
-	Quit +$g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"Debug"))=1
-}
-
-ClassMethod IsAutoCreateRepoOn() As %Boolean
+Method IsAutoCreateRepoOnGet() As %Boolean
 {
 	Quit +$g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"AutoCreateRepo"))=1
 }
 
-ClassMethod IsAutoCommitOn() As %Boolean
+Method IsAutoCommitOnGet() As %Boolean
 {
 	Quit +$g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"AutoCommit"))=1
 }
@@ -519,6 +500,11 @@ ClassMethod IsAutoCommitOn() As %Boolean
 Method LocalWorkspaceRootGet() As %String
 {
 	Quit $g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"LocalWorkspaceRoot"))
+}
+
+Method SrcGet() As %String
+{
+	Quit $g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"Src"))
 }
 
 Method IsInitializedGet() As %Boolean
@@ -529,9 +515,9 @@ Method IsInitializedGet() As %Boolean
 	Quit $$$OK
 }
 
-Method RepositoryRootGet() As %String
+Method RemoteRepositoryGet() As %String
 {
-	Quit $g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"RepositoryRoot"))
+	Quit $g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"RemoteRepository"))
 }
 
 Method RemoteUserGet() As %String
@@ -542,6 +528,11 @@ Method RemoteUserGet() As %String
 Method RemotePasswordGet() As %String
 {
 	Quit $g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"RemotePassword"))
+}
+
+Method DebugGet() As %String
+{
+	Quit +$g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"Debug"))=1
 }
 
 Method DumpOutput(msg As %GlobalCharacterStream, tag As %String = "OUTPUT")
