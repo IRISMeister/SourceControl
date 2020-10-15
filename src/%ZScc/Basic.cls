@@ -249,18 +249,11 @@ Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NU
 		}	
 	}
 
-	/*
-	//default projectへの登録アイテムは保存しない
-	If $E(..CurrentProjectName,1,$L($$$DEFAULTPRJNAME))=$$$DEFAULTPRJNAME {
-		Write $$$MSGNODEFAULTPRJ,!
-		Quit $$$OK
-	}
-
 	//default project自体は保存しない
 	If $E(InternalName,1,$L($$$DEFAULTPRJNAME))=$$$DEFAULTPRJNAME {
+		W $$$MSGNODEFAULTPRJ,!
 		Quit $$$OK
 	}	
-	*/
 
 	Set path=..GetLocalWorkspacePath()
 	Set ..ExternalName=##class(%ZScc.Utils).ExportSingleItem(InternalName,path,..Debug)
@@ -276,6 +269,33 @@ Method ConfigNameGet() As %String
 /// ダイアログ表示の後にユーザの入力値に基づいたアクションをここに記述
 Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %String, Answer As %Integer, Msg As %String = "", ByRef Reload As %Boolean) As %Status
 {
+	If ..Debug Write "Method 'AfterUserAction(Basic)' Type:"_Type_" Name:"_Name_" InternalName:"_InternalName_" Answer:"_Answer_" Msg:"_Msg_" Reload:"_$G(Reload),!
+
+	if Type=$$$ACTIONTYPEMENU {
+		Set menuID=..TranslateMenuNameToMenuID(Name)
+		If menuID="import" { //import all from workspace
+			If Answer'=$$$YES Quit $$$OK
+			Set dire=..GetLocalWorkspacePath()
+			If ##class(%File).Exists(dire) {
+				Do $SYSTEM.OBJ.ImportDir(dire,"*.mac;*.cls;*.xml;*.inc","ck",.e,1)
+				zw e
+			}
+			Else { Quit '$$$OK }
+
+		} 
+		ElseIf menuID="import1" { //import an item from workspace
+			If Answer'=$$$YES Quit $$$OK
+			If InternalName'="" {
+				Set path=..GetLocalWorkspacePath()
+				Set file=##class(%ZScc.Utils).ExternalName(InternalName,path)
+				Do $System.OBJ.Load(file,"ck")
+			}
+			Else {
+				W $$$USERACTMSGSTATUS1,!
+			}
+		}
+	}
+
 	Quit $$$OK
 }
 
@@ -295,14 +315,6 @@ Method AddProjectItems() As %Status
 {
 	if ..Debug Write "AddProjectItems.  Target:",..CurrentProjectName,!
 	If '..IsInitialized  Quit '$$$OK
-
-	/*
-	//default projectは保存しない
-	If $E(..CurrentProjectName,1,$L($$$DEFAULTPRJNAME))=$$$DEFAULTPRJNAME {
-		Write $$$MSGNODEFAULTPRJ,!
-		Quit '$$$OK
-	}
-	*/
 
 	Set path=..GetLocalWorkspacePath()
 	Set tSC=##class(%ZScc.Utils).ExportProjectItems(..CurrentProjectName,path,..Debug)
@@ -494,6 +506,11 @@ Method IsAutoCreateRepoOnGet() As %Boolean
 Method IsAutoCommitOnGet() As %Boolean
 {
 	Quit +$g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"AutoCommit"))=1
+}
+
+Method IsAutoCommitOnSet(val As %Boolean) As %Status
+{
+	Set ^SYS("SourceControl",$Parameter(,"PRODUCT"),"AutoCommit")=val
 }
 
 Method LocalWorkspaceRootGet() As %String

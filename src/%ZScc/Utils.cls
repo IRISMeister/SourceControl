@@ -83,9 +83,15 @@ ClassMethod ExportProjectItems(ProjectName As %String, Directory As %String = ""
 		If $ZCVT(rs.Data("Type"),"L")="cls" Set InternalName=InternalName_".cls"
 		Set extName=##class(%ZScc.Utils).ExportSingleItem(InternalName,Directory,Debug)
  	}	
-	//Export a project file itself.
-	Set projectname=ProjectName_".PRJ"
-	Set extName=##class(%ZScc.Utils).ExportSingleItem(projectname,Directory,Debug)
+	#;Export a project file itself.
+	#;don't export default project because $System.OBJ.Export() rejects it.
+	If $E(ProjectName,1,$L($$$DEFAULTPRJNAME))'=$$$DEFAULTPRJNAME {
+		Set projectname=ProjectName_".PRJ"
+		Set extName=##class(%ZScc.Utils).ExportSingleItem(projectname,Directory,Debug)
+	}
+	Else {
+		W $$$MSGNODEFAULTPRJ,!
+	}
 
 	Quit $$$OK
 }
@@ -121,8 +127,10 @@ ClassMethod ExportAllItems(Directory As %String = "", Debug = 0) As %Status
 	while tRS.Next() {
 		set tInternalName=tRS.Get("Name")_".PRJ"
 		#;don't export default project because $System.OBJ.Export() rejects it.
-		If $E(tInternalName,1,$L($$$DEFAULTPRJNAME))=$$$DEFAULTPRJNAME Continue
-
+		If $E(tInternalName,1,$L($$$DEFAULTPRJNAME))=$$$DEFAULTPRJNAME {
+			#;W $$$MSGNODEFAULTPRJ,!  // too verbose...
+			Continue
+		}
 		Set extName=##class(%ZScc.Utils).ExportSingleItem(tInternalName,Directory,Debug)
 	}
 	

@@ -103,30 +103,10 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 {
 	If ..Debug Write "Method 'AfterUserAction(GIT)' Type:"_Type_" Name:"_Name_" InternalName:"_InternalName_" Answer:"_Answer_" Msg:"_Msg_" Reload:"_$G(Reload),!
 
+	Do ##super(Type,Name,InternalName,Answer,Msg,.Reload)
 	if Type=$$$ACTIONTYPEMENU {
 		Set menuID=..TranslateMenuNameToMenuID(Name)
-		If menuID="import" { //import all from workspace
-			If Answer'=$$$YES Quit $$$OK
-			Set dire=..GetLocalWorkspacePath()
-			If ##class(%File).Exists(dire) {
-				Do $SYSTEM.OBJ.ImportDir(dire,"*.mac;*.cls;*.xml;*.inc","ck",.e,1)
-				zw e
-			}
-			Else { Quit '$$$OK }
-
-		} 
-		ElseIf menuID="import1" { //import an item from workspace
-			If Answer'=$$$YES Quit $$$OK
-			If InternalName'="" {
-				Set path=..GetLocalWorkspacePath()
-				Set file=##class(%ZScc.Utils).ExternalName(InternalName,path)
-				Do $System.OBJ.Load(file,"ck")
-			}
-			Else {
-				W $$$USERACTMSGSTATUS1,!
-			}
-		}
-		ElseIf menuID="commit" {
+		If menuID="commit" {
 			If Answer'=$$$YES Quit $$$OK
 			Set comment=Msg
 			Do ..Commit("",comment)
