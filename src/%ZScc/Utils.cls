@@ -69,11 +69,14 @@ ClassMethod SaveFormat(ItemType As %String) As %String
 
 ClassMethod ExportProjectItems(ProjectName As %String, Directory As %String = "", Debug = 0) As %Status
 {
-	Set projectname=$P(ProjectName,".",1)
-	If '##class(%Studio.Project).%ExistsId(projectname) { Quit '$$$OK }
+	If Debug { 
+		w "Method 'ExportProjectItems' ProjectName:"_ProjectName_" Directory: "_Directory,!
+	} 
+
+	If '##class(%Studio.Project).%ExistsId(ProjectName) { Quit '$$$OK }
 
 	Set rs=##class(%ResultSet).%New("%Studio.Project:ProjectItemsList")
- 	Do rs.Execute(projectname)
+ 	Do rs.Execute(ProjectName)
  	While (rs.Next()) {
 		Set InternalName=rs.Data("Name")
 		#; class lacks extension, so add it.
@@ -81,7 +84,8 @@ ClassMethod ExportProjectItems(ProjectName As %String, Directory As %String = ""
 		Set extName=##class(%ZScc.Utils).ExportSingleItem(InternalName,Directory,Debug)
  	}	
 	//Export a project file itself.
-	Set extName=##class(%ZScc.Utils).ExportSingleItem(ProjectName,Directory,Debug)
+	Set projectname=ProjectName_".PRJ"
+	Set extName=##class(%ZScc.Utils).ExportSingleItem(projectname,Directory,Debug)
 
 	Quit $$$OK
 }
@@ -116,7 +120,7 @@ ClassMethod ExportAllItems(Directory As %String = "", Debug = 0) As %Status
 	do tRS.Execute()
 	while tRS.Next() {
 		set tInternalName=tRS.Get("Name")_".PRJ"
-		#;don't export default project
+		#;don't export default project because $System.OBJ.Export() rejects it.
 		If $E(tInternalName,1,$L($$$DEFAULTPRJNAME))=$$$DEFAULTPRJNAME Continue
 
 		Set extName=##class(%ZScc.Utils).ExportSingleItem(tInternalName,Directory,Debug)

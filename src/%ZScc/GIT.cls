@@ -56,9 +56,9 @@ Method OnBeforeLoad(InternalName As %String) As %Status
 	If ##class(%ZScc.Utils).ItemCategory(tType)="project" {
 #if 1		
 		If ..IsAutoCreateRepoOn {
-			if '##class(%File).Exists(..LocalWorkspaceRoot_..CurrentProjectName_$$$FolderDelimiter_".git") {
+			if '##class(%File).Exists(..LocalWorkspaceRoot_".git") {
 				#;これによりWORKがGITの管理対象になる(.gitフォルダが作成される)
-				Do ..InitDir()
+				Do ..InitDir(..LocalWorkspaceRoot)
 
 				If ..GetRemoteRepositoryPath()'="" {
 					Set sts=..CheckRemoteRepository(..GetRemoteRepositoryPath())
@@ -101,13 +101,13 @@ Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NU
 /// ダイアログ表示の後にユーザの入力値に基づいたアクションをここに記述
 Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %String, Answer As %Integer, Msg As %String = "", ByRef Reload As %Boolean) As %Status
 {
-	If ..Debug Write "Method 'AfterUserAction' Type:"_Type_" Name:"_Name_" InternalName:"_InternalName_" Answer:"_Answer_" Msg:"_Msg_" Reload:"_$G(Reload),!
+	If ..Debug Write "Method 'AfterUserAction(GIT)' Type:"_Type_" Name:"_Name_" InternalName:"_InternalName_" Answer:"_Answer_" Msg:"_Msg_" Reload:"_$G(Reload),!
 
 	if Type=$$$ACTIONTYPEMENU {
 		Set menuID=..TranslateMenuNameToMenuID(Name)
 		If menuID="import" { //import all from workspace
 			If Answer'=$$$YES Quit $$$OK
-			Set dire=..GetLocalWorkspaceProjectPath()
+			Set dire=..GetLocalWorkspacePath()
 			If ##class(%File).Exists(dire) {
 				Do $SYSTEM.OBJ.ImportDir(dire,"*.mac;*.cls;*.xml;*.inc","ck",.e,1)
 				zw e
@@ -117,9 +117,14 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 		} 
 		ElseIf menuID="import1" { //import an item from workspace
 			If Answer'=$$$YES Quit $$$OK
-			Set path=..GetLocalWorkspaceProjectPath()
-			Set file=##class(%ZScc.Utils).ExternalName(InternalName,path)
-			Do $System.OBJ.Load(file,"ck")
+			If InternalName'="" {
+				Set path=..GetLocalWorkspacePath()
+				Set file=##class(%ZScc.Utils).ExternalName(InternalName,path)
+				Do $System.OBJ.Load(file,"ck")
+			}
+			Else {
+				W $$$USERACTMSGSTATUS1,!
+			}
 		}
 		ElseIf menuID="commit" {
 			If Answer'=$$$YES Quit $$$OK
@@ -128,8 +133,13 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 		}
 		ElseIf menuID="checkout1" {
 			If Answer'=$$$YES Quit $$$OK
-			Set extName=##class(%ZScc.Utils).ExternalName(InternalName,"")			
-			Do ..CheckOut1(..GetLocalWorkspaceProjectPath(),extName) 
+			If InternalName'="" {
+				Set extName=##class(%ZScc.Utils).ExternalName(InternalName,"")			
+				Do ..CheckOut1(..GetLocalWorkspacePath(),extName) 
+			}
+			Else {
+				W $$$USERACTMSGSTATUS1,!
+			}
 		}
 		ElseIf menuID="checkout2" {
 			#;NYI
@@ -142,21 +152,15 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 Method InitDir(DirectoryName As %String = "", Repository As %String = "") As %Status
 {
 
+	if ..Debug Write "Method 'InitDir' DirectoryName:"_DirectoryName_" Repository:"_Repository,!
+
 	#; git init
-	If DirectoryName="" {Set p1=..GetLocalWorkspaceProjectPath()}
+	If DirectoryName="" {Set p1=..GetLocalWorkspacePath()}
 	Else {Set p1=DirectoryName}
 	Set p2=""
 
-	if ..Debug Write "Method 'InitDir' DirectoryName:"_p1_" Repository:"_p2,!
-
-	if ..CurrentProjectName="" {
-		Write "..CurrentProjectName is empty. Do nothing.",!
-		Quit $$$OK
-	}
 
 	Set tSC=##class(%File).CreateDirectoryChain(p1,.ret)
-
-
 	Set tCmd=##class(%ZScc.GIT.Command).%New($lb(p1,p2))
 	Set tCmd.SubCommand="init"
 	Do tCmd.Execute()
@@ -181,10 +185,15 @@ Method InitDir(DirectoryName As %String = "", Repository As %String = "") As %St
 
 Method CheckOut1(DirectoryName As %String = "", FileName As %String = "") As %Status
 {
-	If DirectoryName="" {Set p1=..GetLocalWorkspaceProjectPath()}
+	if ..Debug Write "Method 'CheckOut1' DirectoryName:"_DirectoryName_" FileName:"_FileName,!
+
+	If FileName="." {
+		Write $$$USERACTMSGSTATUS1,!
+		Quit $$$OK
+	}
+	If DirectoryName="" {Set p1=..GetLocalWorkspacePath()}
 	Else {Set p1=DirectoryName}
 
-	if ..Debug Write "Method 'CheckOutDir' DirectoryName:"_p1_" FileName:"_FileName,!
 
 	Set tCmd=##class(%ZScc.GIT.Command).%New($lb(p1,""))
 	Set tCmd.SubCommand="checkout HEAD "_FileName
@@ -198,10 +207,10 @@ Method CheckOut1(DirectoryName As %String = "", FileName As %String = "") As %St
 
 Method CheckOut2(DirectoryName As %String = "", Branch As %String = "") As %Status
 {
-	If DirectoryName="" {Set p1=..GetLocalWorkspaceProjectPath()}
-	Else {Set p1=DirectoryName}
+	if ..Debug Write "Method 'CheckOut2' DirectoryName:"_DirectoryName_" Branch:"_Branch,!
 
-	if ..Debug Write "Method 'CheckOutDir' DirectoryName:"_p1_" Branch:"_Branch,!
+	If DirectoryName="" {Set p1=..GetLocalWorkspacePath()}
+	Else {Set p1=DirectoryName}
 
 	Set tCmd=##class(%ZScc.GIT.Command).%New($lb(p1,""))
 	Set tCmd.SubCommand="checkout "_Branch
@@ -218,10 +227,10 @@ Method Add(FileName As %String = "", Description As %String = "") As %Status
 	if ..Debug Write "Method 'Add' FileName "_FileName_" Description:"_Description,!
 	If FileName="" Quit $$$OK
 
-	Set p1=..GetLocalWorkspaceProjectPath()
+	Set p1=..GetLocalWorkspacePath()
 	Set p2=FileName
 	
-	if ..Debug Write "Adding to Repository: file "_p1_" filename "_p2,!
+	if ..Debug Write "Adding to Repository: "_p1_" filename: "_p2,!
 
 	Set tCmd=##class(%ZScc.GIT.Command).%New($lb(p1,p2))
 	Set tCmd.SubCommand="add"
@@ -237,7 +246,7 @@ Method Commit(FileName As %String = "", Description As %String = "default commit
 {
 	if ..Debug Write "Method 'Commit' FileName "_FileName_" Description:"_Description,!
 
-	s p1=..GetLocalWorkspaceProjectPath()
+	s p1=..GetLocalWorkspacePath()
 	s p2=""
 	if ..Debug Write "Commiting to Repository  directory:"_p1_" filename:"_p2,!
 
@@ -258,7 +267,7 @@ Method Pull() As %Status
 {
 	if ..Debug Write "Method 'Pull' Current branch:",..Branch,!
 
-	s p1=..GetLocalWorkspaceProjectPath()
+	s p1=..GetLocalWorkspacePath()
 	s p2=""
 	if ..Debug Write "Pulling from remote repository:"_..RemoteRepository,!
 
@@ -278,7 +287,7 @@ Method Push() As %Status
 {
 	if ..Debug Write "Method 'Push' Current branch:",..Branch,!
 
-	s p1=..GetLocalWorkspaceProjectPath()
+	s p1=..GetLocalWorkspacePath()
 	s p2=""
 	if ..Debug Write "Pushing to remote repository:"_..RemoteRepository,!
 
@@ -298,7 +307,7 @@ Method Status(FileName As %String = "", verbose As %Boolean = 0) As %Status
 	#;svn status --show-updates --verbose test.mac.xml
 	if ..Debug Write "Method 'Status' FileName "_FileName,!
 
-	s p1=..GetLocalWorkspaceProjectPath()
+	s p1=..GetLocalWorkspacePath()
 	s p2=FileName
 
 	Set tCmd=##class(%ZScc.GIT.Command).%New($lb(p1,p2))
@@ -339,7 +348,7 @@ Method CheckRemoteRepository(Repository As %String) As %Integer
 	#; C:\Users\iwamoto\git\iris-shell2docker>git config --get remote.origin.url
 	if ..Debug Write "Method 'CheckRepository' Repository "_Repository,!
 
-	s p1=..GetLocalWorkspaceProjectPath()
+	s p1=..GetLocalWorkspacePath()
 	s p2="" ;Repository
 	If ..Debug { W "p1=",p1,!,"p2=",p2,! }
 	Set tCmd=##class(%ZScc.GIT.Command).%New($lb(p1,p2))
@@ -363,7 +372,7 @@ Method LinkToRepository(Repository As %String) As %Integer
 {
 	if ..Debug Write "Method 'LinkToRepository' Repository "_Repository,!
 
-	Set p1=..GetLocalWorkspaceProjectPath()
+	Set p1=..GetLocalWorkspacePath()
 	Set Repository=$REPLACE(Repository,"//","//"_..RemoteUser_":"_..RemotePassword_"@")
 	Set p2=Repository
 	If ..Debug { W "p1=",p1,!,"p2=",p2,! }
@@ -403,7 +412,7 @@ ClassMethod SampleSetup()
 	Kill ^SYS("SourceControl",..#PRODUCT)
 	Set ^SYS("SourceControl",..#PRODUCT,"Debug")=0
 
-	If $$$ISWINDOWS { Set root="C:\Users\YourOSUserName\git\" } Else { Set root="/home/irisusr/git/"}
+	If $$$ISWINDOWS { Set root="C:\var\git\Project_XYZ\" } Else { Set root="/home/irisusr/git/Project_XYZ/"}
 	Set ^SYS("SourceControl",..#PRODUCT,"LocalWorkspaceRoot")=root
 	Set ^SYS("SourceControl",..#PRODUCT,"MainCommand")="git"
 	Set ^SYS("SourceControl",..#PRODUCT,"AutoCreateRepo")=0

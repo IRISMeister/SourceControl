@@ -21,15 +21,19 @@ ClassMethod OnPageBODY() As %Boolean
 	&HTML<^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")>
 	&HTML<^SYS("SourceControl","#(..#PRODUCT)#","Src")>
 
+	&HTML<<br/>>
+	&HTML<[現在の設定]>
+	&HTML<^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")=#($G(^SYS("SourceControl",..#PRODUCT,"LocalWorkspaceRoot")))#>
+	&HTML<^SYS("SourceControl","#(..#PRODUCT)#","Src")=#($G(^SYS("SourceControl",..#PRODUCT,"Src")))#>
 
 	&HTML<<br/>>
 	&HTML<[設定例]>
 	&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","Debug")=0>
 	If $$$ISWINDOWS {
-		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="c:\var\basic\">
+		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="c:\var\basic\Project_XYZ\">
 	}
 	Else {
-		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="/home/irisusr/basic/">
+		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="/home/irisusr/basic/Project_XYZ/">
 	}
 	&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","Src")="src">
 	&HTML<</PRE>>

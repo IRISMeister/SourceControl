@@ -64,7 +64,7 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 	If ..Debug {
 		Set tName=Name
 		#;If Type=$$$ACTIONTYPEOTHER Set tName=$P(..#USERACTIONNAME,";",Name+1)_"("_Name_")"
-		Write "Method 'UserAction' Type:"_Type_" Name:"_tName_" InternalName:"_InternalName_" SelectedText:"_SelectedText_" Action:"_Action_" Target:"_Target_" Msg:"_Msg_" Reload:"_$G(Reload),!
+		Write "Method 'UserAction' Type:"_Type_" Name:"_tName_" InternalName:"_InternalName_" SelectedText:"_SelectedText_" Action:"_$G(Action)_" Target:"_$G(Target)_" Msg:"_$G(Msg)_" Reload:"_$G(Reload),!
 	}
 	#; 標準のImportを実行した場合
 	#; ドキュメント毎に、Add/Commitが発生する(遅い)のを防ぐため、この場合何もしない。
@@ -202,7 +202,6 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 
 			w "CurrentProjectName: ",..CurrentProjectName,!
 			w "GetLocalWorkspacePath(): ",..GetLocalWorkspacePath(),!
-			w "GetLocalWorkspaceProjectPath(): ",..GetLocalWorkspaceProjectPath(),!
 			w "GetExtraPath(): ",..GetExtraPath(),!
 			w "GetRepositoryPath(): ",..GetRepositoryPath(),!
 			w "<<<End of dump>>>",!
@@ -243,22 +242,28 @@ Method OnAfterSave(InternalName As %String, Object As %RegisteredObject = {$$$NU
 
 	//project保存の際、現在のCurrentProjectPathと一致しない場合は保存しない
 	//Projectを「名前を付けて保存」した際に発生
-	If ##class(%ZScc.Utils).GetItemName(InternalName)'=..CurrentProjectName {
-		Quit $$$OK
-	}	
+	If ##class(%ZScc.Utils).GetItemType(InternalName)="prj" {
+		If ##class(%ZScc.Utils).GetItemName(InternalName)'=..CurrentProjectName {
+			Write "Project Name doesn't match. InternalName:"_InternalName_" CurrentProjectName:"_..CurrentProjectName,!
+			Quit $$$OK
+		}	
+	}
 
+	/*
 	//default projectへの登録アイテムは保存しない
 	If $E(..CurrentProjectName,1,$L($$$DEFAULTPRJNAME))=$$$DEFAULTPRJNAME {
 		Write $$$MSGNODEFAULTPRJ,!
 		Quit $$$OK
 	}
+
 	//default project自体は保存しない
 	If $E(InternalName,1,$L($$$DEFAULTPRJNAME))=$$$DEFAULTPRJNAME {
 		Quit $$$OK
 	}	
+	*/
 
 	Set path=..GetLocalWorkspacePath()
-	Set ..ExternalName=..Src_$$$FolderDelimiter_##class(%ZScc.Utils).ExportSingleItem(InternalName,path,..Debug)
+	Set ..ExternalName=##class(%ZScc.Utils).ExportSingleItem(InternalName,path,..Debug)
 
 	Quit $$$OK
 }
@@ -291,11 +296,13 @@ Method AddProjectItems() As %Status
 	if ..Debug Write "AddProjectItems.  Target:",..CurrentProjectName,!
 	If '..IsInitialized  Quit '$$$OK
 
+	/*
 	//default projectは保存しない
 	If $E(..CurrentProjectName,1,$L($$$DEFAULTPRJNAME))=$$$DEFAULTPRJNAME {
 		Write $$$MSGNODEFAULTPRJ,!
 		Quit '$$$OK
 	}
+	*/
 
 	Set path=..GetLocalWorkspacePath()
 	Set tSC=##class(%ZScc.Utils).ExportProjectItems(..CurrentProjectName,path,..Debug)
@@ -410,20 +417,12 @@ Method TranslateMenuNameToMenuID(Name As %String, ByRef DisplayName As %String) 
 
 Method GetExtraPath() As %String
 {
-	//Quit ..ConfigName_$$$FolderDelimiter_$NAMESPACE_$$$FolderDelimiter
-	Quit ..CurrentProjectName_$$$FolderDelimiter_..Src_$$$FolderDelimiter
+	Quit ..Src_$$$FolderDelimiter
 }
 
 Method GetLocalWorkspacePath() As %String
 {
 	set tPath=..LocalWorkspaceRoot_..GetExtraPath()
-	Quit tPath
-}
-
-/// accessor method for LocalWorspacePath property
-Method GetLocalWorkspaceProjectPath() As %String
-{
-	set tPath=..LocalWorkspaceRoot_..CurrentProjectName
 	Quit tPath
 }
 
@@ -504,7 +503,7 @@ Method LocalWorkspaceRootGet() As %String
 
 Method SrcGet() As %String
 {
-	Quit $g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"Src"))
+	Quit $g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"Src"),"src")
 }
 
 Method IsInitializedGet() As %Boolean
@@ -551,7 +550,7 @@ ClassMethod SampleSetup()
 {
 	Kill ^SYS("SourceControl",..#PRODUCT)
 	Set ^SYS("SourceControl",..#PRODUCT,"Debug")=0
-	If $$$ISWINDOWS { Set root="c:\var\basic\" } Else { Set root="/home/irisusr/basic/"}
+	If $$$ISWINDOWS { Set root="c:\var\basic\Project_XYZ\" } Else { Set root="/home/irisusr/basic/Project_XYZ/"}
 	Set ^SYS("SourceControl",..#PRODUCT,"LocalWorkspaceRoot")=root
 	Set ^SYS("SourceControl",..#PRODUCT,"Src")="src"
 }
