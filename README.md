@@ -21,3 +21,8 @@ On Windows ターミナル起動。第1引数(パス)を適宜変更のこと。
 $
 ```
 
+ソースコード管理の設定画面は下記のようにCSPページにアクセスします。
+```ObjectScript
+	Set Target=$system.CSP.GetDefaultApp($NAMESPACE)_"/%25ZScc.ui."_$Parameter(,"PRODUCT")_".Setting.cls"			
+```
+例えばネームスペースMYAPPに/csp/myappが存在しない、もしくは存在してもRESTアクセス用であった場合、設定画面の表示に失敗します。設定画面の表示は必須ではありませんので、その場合、直接グローバルへの設定を行ってください。

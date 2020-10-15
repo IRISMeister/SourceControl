@@ -113,6 +113,7 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 		}	
 		
 		if menuID="settings" {
+			#; Fails if Default App is not CSP-Application Enabled or doesn't exist.
 			set Action=$$$ACTIONRUNCSP
 			Set Target=$system.CSP.GetDefaultApp($NAMESPACE)_"/%25ZScc.ui."_$Parameter(,"PRODUCT")_".Setting.cls"			
 		} elseif menuID="addpj" {
