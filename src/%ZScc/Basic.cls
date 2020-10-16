@@ -50,7 +50,7 @@ XData Menu
 <MenuItem Separator="1"/> 
 <MenuItem Name="addpj" />
 <MenuItem Name="addns" />
-<MenuItem Name="import" />
+<MenuItem Name="importall" />
 <MenuItem Name="import1" />
 <MenuItem Separator="1"/> 
 <MenuItem Name="dump"/>
@@ -131,9 +131,9 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 		} elseif menuID="checkout2" {
 			set Action=$$$ACTIONSIMPLEDIALOG
 			set Target=$$$USERACTMSGCO2
-		} elseif menuID="import" {
+		} elseif menuID="importall" {
 			set Action=$$$ACTIONSIMPLEDIALOG
-			set Target=$$$USERACTMSGIMPORT
+			set Target=$$$USERACTMSGIMPORTALL
 		} elseif menuID="import1" {
 			set Action=$$$ACTIONSIMPLEDIALOG
 			set Target=$$$USERACTMSGIMPORT1
@@ -274,7 +274,7 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 
 	if Type=$$$ACTIONTYPEMENU {
 		Set menuID=..TranslateMenuNameToMenuID(Name)
-		If menuID="import" { //import all from workspace
+		If menuID="importall" { //import all from workspace
 			If Answer'=$$$YES Quit $$$OK
 			Set dire=..GetLocalWorkspacePath()
 			If ##class(%File).Exists(dire) {
@@ -319,7 +319,7 @@ Method AddProjectItems() As %Status
 
 	Set path=..GetLocalWorkspacePath()
 	Set tSC=##class(%ZScc.Utils).ExportProjectItems(..CurrentProjectName,path,..Debug)
-
+	w $$$USERACTMSGEXPORTPRJDONE,!
 	Quit tSC
 }
 
@@ -330,6 +330,7 @@ Method AddNameSpaceItems() As %Status
 	
 	Set path=..GetLocalWorkspacePath()
 	Do ##class(%ZScc.Utils).ExportAllItems(path,..Debug)
+	W $$$USERACTMSGEXPORTALLDONE,!
 	Quit $$$OK
 }
 
@@ -409,7 +410,7 @@ Method TranslateMenuNameToMenuID(Name As %String, ByRef DisplayName As %String) 
 	ElseIf tMenu="checkout" {Set DisplayName=$$$MENUCHECKOUT   }
 	ElseIf tMenu="checkout1" {Set DisplayName=$$$MENUCHECKOUT1   }
 	ElseIf tMenu="checkout2" {Set DisplayName=$$$MENUCHECKOUT2   }
-	ElseIf tMenu="import" {Set DisplayName=$$$MENUIMPALL   }
+	ElseIf tMenu="importall" {Set DisplayName=$$$MENUIMPALL   }
 	ElseIf tMenu="import1" {Set DisplayName=$$$MENUIMP1   }
 	ElseIf tMenu="commiton"  {Set DisplayName=$$$MENUENACOMMIT   }
 	ElseIf tMenu="commitoff"  {Set DisplayName=$$$MENUDISACOMMIT }

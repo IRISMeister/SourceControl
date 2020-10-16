@@ -41,6 +41,8 @@ ROUTINE %ZScc.Constants [Type=INC]
 #DEFINE MENUCOMMIT "Commit"
 #DEFINE MENUTEST "Test"
 #DEFINE MENUDYMP "Dump Settings"
+#DEFINE MENUPULL "Pull from remote"
+#DEFINE MENUPUSH "Push to remote"
  */
 #DEFINE MENUSETTINGS "設定"
 #DEFINE MENUADDPJ "プロジェクトをレポジトリに追加"
@@ -62,13 +64,13 @@ ROUTINE %ZScc.Constants [Type=INC]
 #DEFINE MENUDISASHOWCMD "コマンドを非表示"
 #DEFINE MENUTEST "テスト"
 #DEFINE MENUDYMP "設定のダンプ"
-#DEFINE MENUPULL "Pull from remote"
-#DEFINE MENUPUSH "Push to remote"
+#DEFINE MENUPULL "リモートからプル"
+#DEFINE MENUPUSH "リモートにプッシュ"
 
 #DEFINE USERACTMSGCO "レポジトリからワークに全てのアイテムをチェックアウトします。実行しますか？"
 #DEFINE USERACTMSGCO1 "ワークに現在のアイテムをチェックアウトします。実行しますか？"
 #DEFINE USERACTMSGCO2 "ブランチを切り替えます。実行しますか？"
-#DEFINE USERACTMSGIMPORT "ワークの全内容をロードします。レポジトリに影響は与えません。"_$C(13,10)_"実行しますか？"
+#DEFINE USERACTMSGIMPORTALL "ワークの全内容をロードします。レポジトリに影響は与えません。"_$C(13,10)_"実行しますか？"
 #DEFINE USERACTMSGIMPORT1 "選択中の項目のみをワークからロードします。レポジトリに影響は与えません。"_$C(13,10)_"実行しますか？"
 #DEFINE USERACTMSGCOMMITON "自動コミットを有効にしました。"
 #DEFINE USERACTMSGCOMMITOFF "自動コミットを無効にしました。保存時にコミットされなくなります。明示的にコミットを実行してください。"
@@ -77,6 +79,9 @@ ROUTINE %ZScc.Constants [Type=INC]
 #DEFINE USERACTMSGPUSHFAIL "Pushに失敗しました。"
 #DEFINE USERACTMSGPULLFAIL "Pullに失敗しました。"
 #DEFINE USERACTMSGNYI "Not Yet Implemented. "
+
+#DEFINE USERACTMSGEXPORTALLDONE "ネームスペースの内容をワークディレクトリに出力しました。"
+#DEFINE USERACTMSGEXPORTPRJDONE "プロジェクトの内容をワークディレクトリに出力しました。"
 
  //#DEFINE MSGNODEFAULTPRJ "Warning !!! Default project will not be source controled."
 #DEFINE MSGNODEFAULTPRJ "デフォルトプロジェクトはソース管理の対象になりません。"

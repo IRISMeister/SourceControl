@@ -16,7 +16,7 @@ XData Menu
 <MenuItem Name="checkout2" />
 <MenuItem Separator="1"/> 
 -->
-<MenuItem Name="import" />
+<MenuItem Name="importall" />
 <MenuItem Name="import1" />
 <MenuItem Separator="1"/> 
 <MenuItem Name="commiton" />

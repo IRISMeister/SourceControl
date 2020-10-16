@@ -69,11 +69,10 @@ ClassMethod SaveFormat(ItemType As %String) As %String
 
 ClassMethod ExportProjectItems(ProjectName As %String, Directory As %String = "", Debug = 0) As %Status
 {
-	If Debug { 
-		w "Method 'ExportProjectItems' ProjectName:"_ProjectName_" Directory: "_Directory,!
-	} 
-
+	If Debug { w "Method 'ExportProjectItems' ProjectName:"_ProjectName_" Directory: "_Directory,! } 
 	If '##class(%Studio.Project).%ExistsId(ProjectName) { Quit '$$$OK }
+
+	Set cnt=0
 
 	Set rs=##class(%ResultSet).%New("%Studio.Project:ProjectItemsList")
  	Do rs.Execute(ProjectName)
@@ -82,22 +81,28 @@ ClassMethod ExportProjectItems(ProjectName As %String, Directory As %String = ""
 		#; class lacks extension, so add it.
 		If $ZCVT(rs.Data("Type"),"L")="cls" Set InternalName=InternalName_".cls"
 		Set extName=##class(%ZScc.Utils).ExportSingleItem(InternalName,Directory,Debug)
+		If extName'="" { Set cnt=cnt+1 }
+
  	}	
 	#;Export a project file itself.
 	#;don't export default project because $System.OBJ.Export() rejects it.
 	If $E(ProjectName,1,$L($$$DEFAULTPRJNAME))'=$$$DEFAULTPRJNAME {
 		Set projectname=ProjectName_".PRJ"
 		Set extName=##class(%ZScc.Utils).ExportSingleItem(projectname,Directory,Debug)
+		If extName'="" { Set cnt=cnt+1 }
 	}
 	Else {
 		W $$$MSGNODEFAULTPRJ,!
 	}
+	W "Exported ",cnt," items",!
 
 	Quit $$$OK
 }
 
 ClassMethod ExportAllItems(Directory As %String = "", Debug = 0) As %Status
 {
+	Set cnt=0
+
 	#;routines
 	set tRS=##class(%ResultSet).%New("%Routine:RoutineList")
 	do tRS.Execute("*",,0)  // INT, MAC, INC, BAS.
@@ -110,6 +115,7 @@ ClassMethod ExportAllItems(Directory As %String = "", Debug = 0) As %Status
 		If $ZCVT($P(db,$$$FolderDelimiter,$L(db,$$$FolderDelimiter)-1),"U")'=$NAMESPACE Continue
 
 		Set extName=##class(%ZScc.Utils).ExportSingleItem(tInternalName,Directory,Debug)
+		If extName'="" { Set cnt=cnt+1 w extName,!}
 	}
 	
 	#;classes
@@ -119,6 +125,7 @@ ClassMethod ExportAllItems(Directory As %String = "", Debug = 0) As %Status
 		If $E(class,1,4)="csp." Continue  // exclude csp classes
 		Set tInternalName=class_".cls"
 		Set extName=##class(%ZScc.Utils).ExportSingleItem(tInternalName,Directory,Debug)
+		If extName'="" { Set cnt=cnt+1 }
 	}
 		
 	#;Project file(ExportAllClassesIndividual doesn't handle this)
@@ -132,12 +139,14 @@ ClassMethod ExportAllItems(Directory As %String = "", Debug = 0) As %Status
 			Continue
 		}
 		Set extName=##class(%ZScc.Utils).ExportSingleItem(tInternalName,Directory,Debug)
+		If extName'="" { Set cnt=cnt+1 }
 	}
 	
 	#;CSP related (ExportAllClassesIndividual doesn't handle this)
 	Set app=$SYSTEM.CSP.GetDefaultApp($NAMESPACE)
 	Set cspdir=$SYSTEM.CSP.GetFileName(app_"/")
-	Do ..ExportAllCSP(cspdir,Directory,Debug)
+	Set cspcnt=..ExportAllCSP(cspdir,Directory,Debug)
+	Set cnt=cnt+cspcnt
 
 	#;Other subclass of %Studio.AbstractDocument
 	If ..IsEnsembleEnabled() { //Ensemble enabled
@@ -145,14 +154,16 @@ ClassMethod ExportAllItems(Directory As %String = "", Debug = 0) As %Status
 		{
 			Set tInternalName="Ens.Config.DefaultSettings.esd"
 			Set extName=##class(%ZScc.Utils).ExportSingleItem(tInternalName,Directory,Debug)
+			If extName'="" { Set cnt=cnt+1 }
 		}
 	}
-	
+	W "Exported ",cnt," items",!
 	Quit $$$OK
 }
 
-ClassMethod ExportAllCSP(cspdir As %String, Directory As %String, Debug)
+ClassMethod ExportAllCSP(cspdir As %String, Directory As %String, Debug) As %Integer
 {
+	Set cnt=0
 	Set defapp=$SYSTEM.CSP.GetDefaultApp($NAMESPACE)
 
 	Set tRS=##class(%ResultSet).%New("%File:FileSet")
@@ -170,9 +181,11 @@ ClassMethod ExportAllCSP(cspdir As %String, Directory As %String, Debug)
 			If path=defapp { 
 				Set cspurl=path_"/"_itemname
 				Set extName=##class(%ZScc.Utils).ExportSingleItem(cspurl,Directory,Debug)
+				If extName'="" { Set cnt=cnt+1 }
 			}
 		}
 	}
+	Quit cnt
 }
 
 ClassMethod ExportSingleItem(InternalName As %String, path As %String, Debug) As %String
@@ -194,11 +207,12 @@ ClassMethod ExportSingleItem(InternalName As %String, path As %String, Debug) As
 	Set ext=##class(%ZScc.Utils).ExternalName(InternalName,path)
 	Set extName=##class(%ZScc.Utils).ExternalName(InternalName,"")
 	If ..SaveFormat(ItemType)="xml" {
-		Do $System.OBJ.Export(InternalName,ext,qualifier)
+		Set tSC=$System.OBJ.Export(InternalName,ext,qualifier)
 	}
 	Else {
-		Do $System.OBJ.ExportUDL(InternalName,ext,qualifier)
-	}	
+		Set tSC=$System.OBJ.ExportUDL(InternalName,ext,qualifier)
+	}
+	If $$$ISERR(tSC) Quit ""
 	Quit extName
 }
 
