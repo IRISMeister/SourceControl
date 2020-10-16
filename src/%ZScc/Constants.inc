@@ -103,7 +103,7 @@ ROUTINE %ZScc.Constants [Type=INC]
 #define	NO			0
 #define CANCEL		2
 	// settings
-#define CMDAUTODELETECOMMIT	+$g(^SYS("SourceControl",$$$PRODUCT,"AutoDeleteCommit")) 
+#define CMDAUTODELETECOMMIT	+$g(^ZScc($$$PRODUCT,"AutoDeleteCommit")) 
 #define	CHECKSTATUS			set Action=6 set err="" d $System.Status.DecomposeStatus(tSC,.err) set Target=err(err)	
  
 #define SPACE	" " 

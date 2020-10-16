@@ -5,7 +5,7 @@ Class %ZScc.Basic Extends %Studio.SourceControl.Base
 
 Parameter PRODUCT = "Basic";
 
-/// ^SYSへの定義が済んでいるか？
+/// ^ZSccへの定義が済んでいるか？
 Property IsInitialized As %Boolean [ Calculated ];
 
 /// 自動commitは有効か？
@@ -82,11 +82,11 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 	If (Type=$$$ACTIONTYPEOTHER),(Name=$$$ACTIONOTHERCONNECT)  {
 
 		If '..IsInitialized  {
-				w " ***************************************************************************************",!
-				w " >>>    If you havn't define ^SYS globals yet,                                       <<<",!
-				w " >>>          plase do so now and restart studio .                                   <<<",!		
-				w " >>>          Until then, source control will not work .                             <<<",!		
-				w " ***************************************************************************************",!
+				w " ******************************************************************************************",!
+				w " >>> ^ZSccグローバルの設定が行われていません。                                           ",!
+				w " >>> 設定メニューを使用するか、直接グローバルのセットを行い設定を完了してください。      ",!		
+				w " >>> 設定の有効化のため、スタジオを再起動、もしくはネームスペース切り替えを行ってください。",!		
+				w " ******************************************************************************************",!
 				#;2014-09-25
 				#;Quit '$$$OK
 				Quit $$$OK
@@ -502,55 +502,56 @@ Method CheckRemoteRepository(Repository As %String) As %Integer
 
 Method IsAutoCreateRepoOnGet() As %Boolean
 {
-	Quit +$g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"AutoCreateRepo"))=1
+	Quit +$g(^ZScc($Parameter(,"PRODUCT"),"AutoCreateRepo"))=1
 }
 
 Method IsAutoCommitOnGet() As %Boolean
 {
-	Quit +$g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"AutoCommit"))=1
+	Quit +$g(^ZScc($Parameter(,"PRODUCT"),"AutoCommit"))=1
 }
 
 Method IsAutoCommitOnSet(val As %Boolean) As %Status
 {
-	Set ^SYS("SourceControl",$Parameter(,"PRODUCT"),"AutoCommit")=val
+	Set ^ZScc($Parameter(,"PRODUCT"),"AutoCommit")=val
 }
 
 Method LocalWorkspaceRootGet() As %String
 {
-	Quit $g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"LocalWorkspaceRoot"))
+	Quit $g(^ZScc($Parameter(,"PRODUCT"),"LocalWorkspaceRoot"))
 }
 
 Method SrcGet() As %String
 {
-	Quit $g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"Src"),"src")
+	Quit $g(^ZScc($Parameter(,"PRODUCT"),"Src"),"src")
 }
 
 Method IsInitializedGet() As %Boolean
 {
-	M t=^SYS("SourceControl",$Parameter(,"PRODUCT"))
+	M t=^ZScc($Parameter(,"PRODUCT"))
 	//These items are essential
 	If $g(t("LocalWorkspaceRoot"))=""  Quit '$$$OK
+	If $g(t("Src"))=""  Quit '$$$OK
 	Quit $$$OK
 }
 
 Method RemoteRepositoryGet() As %String
 {
-	Quit $g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"RemoteRepository"))
+	Quit $g(^ZScc($Parameter(,"PRODUCT"),"RemoteRepository"))
 }
 
 Method RemoteUserGet() As %String
 {
-	Quit $g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"RemoteUser"))
+	Quit $g(^ZScc($Parameter(,"PRODUCT"),"RemoteUser"))
 }
 
 Method RemotePasswordGet() As %String
 {
-	Quit $g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"RemotePassword"))
+	Quit $g(^ZScc($Parameter(,"PRODUCT"),"RemotePassword"))
 }
 
 Method DebugGet() As %String
 {
-	Quit +$g(^SYS("SourceControl",$Parameter(,"PRODUCT"),"Debug"))=1
+	Quit +$g(^ZScc($Parameter(,"PRODUCT"),"Debug"))=1
 }
 
 Method DumpOutput(msg As %GlobalCharacterStream, tag As %String = "OUTPUT")
@@ -567,11 +568,10 @@ Method DumpOutput(msg As %GlobalCharacterStream, tag As %String = "OUTPUT")
 
 ClassMethod SampleSetup()
 {
-	Kill ^SYS("SourceControl",..#PRODUCT)
-	Set ^SYS("SourceControl",..#PRODUCT,"Debug")=0
+	Kill ^ZScc(..#PRODUCT)
 	If $$$ISWINDOWS { Set root="c:\var\basic\Project_XYZ\" } Else { Set root="/home/irisusr/basic/Project_XYZ/"}
-	Set ^SYS("SourceControl",..#PRODUCT,"LocalWorkspaceRoot")=root
-	Set ^SYS("SourceControl",..#PRODUCT,"Src")="src"
+	Set ^ZScc(..#PRODUCT,"LocalWorkspaceRoot")=root
+	Set ^ZScc(..#PRODUCT,"Src")="src"
 }
 
 }

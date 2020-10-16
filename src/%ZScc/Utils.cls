@@ -224,9 +224,9 @@ ClassMethod IsEnsembleEnabled()
 
 /// <PRE>
 /// Follow thses steps.
-/// 0)optional. Set ^SYS("SourceControl","GIT","LocalWorkspaceRoot") value to point to workspace root directory.
+/// 0)optional. Set ^ZScc("GIT","LocalWorkspaceRoot") value to point to workspace root directory.
 /// Example.  
-/// USER> Set ^SYS("SourceControl","GIT","LocalWorkspaceRoot")="c:\var\git\work\"
+/// USER> Set ^ZScc("GIT","LocalWorkspaceRoot")="c:\var\git\work\"
 /// 1)Call this method.
 /// Example.  
 /// C:\var\git\work>SET LocalWorkspaceRoot=%CD%  (optional)
@@ -240,7 +240,7 @@ ClassMethod IsEnsembleEnabled()
 ClassMethod CLExportAll()
 {
 	Set outdir=$SYSTEM.Util.GetEnviron("LocalWorkspaceRoot")
-	If outdir="" { Set outdir=$G(^SYS("SourceControl","GIT","LocalWorkspaceRoot")) }
+	If outdir="" { Set outdir=$G(^ZScc("GIT","LocalWorkspaceRoot")) }
 	If outdir="" { W "LocalWorkspaceRoot is not defined." Quit '$$$OK }
 
 	Set instance=##class(%SYS.System).GetInstanceName()
@@ -265,7 +265,7 @@ ClassMethod CLExportProject(ProjectName = "")
 	If ProjectName="" Quit
 	Set ProjectName=ProjectName_".prj"
 	Set outdir=$SYSTEM.Util.GetEnviron("LocalWorkspaceRoot")
-	If outdir="" { Set outdir=$G(^SYS("SourceControl","GIT","LocalWorkspaceRoot")) }
+	If outdir="" { Set outdir=$G(^ZScc("GIT","LocalWorkspaceRoot")) }
 	If outdir="" { W "LocalWorkspaceRoot is not defined." Quit '$$$OK }
 	
 	Set instance=##class(%SYS.System).GetInstanceName()
@@ -285,7 +285,7 @@ ClassMethod CLExportProject(ProjectName = "")
 ClassMethod CLImportAll()
 {
 	Set indir=$SYSTEM.Util.GetEnviron("LocalWorkspaceRoot")
-	If indir="" { Set outdir=$G(^SYS("SourceControl","GIT","LocalWorkspaceRoot")) }
+	If indir="" { Set outdir=$G(^ZScc("GIT","LocalWorkspaceRoot")) }
 	If indir="" { W "LocalWorkspaceRoot is not defined." Quit '$$$OK }
 	
 	Set instance=##class(%SYS.System).GetInstanceName()

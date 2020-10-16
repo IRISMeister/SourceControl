@@ -61,7 +61,7 @@ git push --set-upstream origin b1
 2. フォルダ構成の決定  
 決まりはありません。ここでは、下記のようなフォルダ構成とします。  
 ```
-フォルダ名: Project1    通常レポジトリ名と一致する。スタジオのプロジェクト名も同名で定義する。
+フォルダ名: Project1    通常レポジトリ名と一致する。
 C:\var\git\Project1     ここにローカルレポジトリ(.gitフォルダ)が存在
 C:\var\git\Project1\... ここにIRISと直接関係のないファイルを配置
 C:\var\git\Project1\src ここにIRIS関連ファイル(cls, mac, incなど)を配置
@@ -99,9 +99,9 @@ BPM,DTL,Ruleの編集内容をソースコントロールに含める必要が�
 ソースコントロールフックを導入・有効化し、ファイル出力先として、ワークディレクトリを指定します。
 ```
 Set $NAMESPACE="APP"
-^SYS("SourceControl","GIT","LocalWorkspaceRoot")="c:\var\git\"
-^SYS("SourceControl","GIT","MainCommand")="git"
-^SYS("SourceControl","GIT","Src")="src"
+^ZScc("GIT","LocalWorkspaceRoot")="c:\var\git\"
+^ZScc("GIT","MainCommand")="git"
+^ZScc("GIT","Src")="src"
 ```
 その後、通常の接続操作でAPPネームスペースに接続します。これでソースコントロールメニューが提供されます。
 また、この設定は、管理ポータルでのBPM,DTL,Rule編集画面でも有効になります。

@@ -389,19 +389,17 @@ Method AddNameSpaceItems() As %Status
 
 ClassMethod SampleSetup()
 {
-	Kill ^SYS("SourceControl",..#PRODUCT)
-	Set ^SYS("SourceControl",..#PRODUCT,"Debug")=0
+	Kill ^ZScc(..#PRODUCT)
 
 	If $$$ISWINDOWS { Set root="C:\var\git\Project_XYZ\" } Else { Set root="/home/irisusr/git/Project_XYZ/"}
-	Set ^SYS("SourceControl",..#PRODUCT,"LocalWorkspaceRoot")=root
-	Set ^SYS("SourceControl",..#PRODUCT,"MainCommand")="git"
-	Set ^SYS("SourceControl",..#PRODUCT,"AutoCreateRepo")=0
-	Set ^SYS("SourceControl",..#PRODUCT,"AutoCommit")=0
-	Set ^SYS("SourceControl",..#PRODUCT,"Src")="src"
+	Set ^ZScc(..#PRODUCT,"LocalWorkspaceRoot")=root
+	Set ^ZScc(..#PRODUCT,"Src")="src"
+	Set ^ZScc(..#PRODUCT,"AutoCreateRepo")=0
+	Set ^ZScc(..#PRODUCT,"AutoCommit")=0
 	/*
-	Set ^SYS("SourceControl",..#PRODUCT,"RemotePassword")="xxxxx"
-	Set ^SYS("SourceControl",..#PRODUCT,"RemoteUser")="xxxx"
-	Set ^SYS("SourceControl",..#PRODUCT,"RemoteRepository")="http://centos7.mydomain/"
+	Set ^ZScc(..#PRODUCT,"RemotePassword")="xxxxx"
+	Set ^ZScc(..#PRODUCT,"RemoteUser")="xxxx"
+	Set ^ZScc(..#PRODUCT,"RemoteRepository")="http://centos7.mydomain/"
 	*/
 }
 

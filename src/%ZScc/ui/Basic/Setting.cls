@@ -18,24 +18,24 @@ ClassMethod OnPageBODY() As %Boolean
 	Write "<!-- Put your page code here -->"
 	&HTML<<PRE>>
 	&HTML<下記のグローバルを対象ネームスペース上に手動で設定してください。>
-	&HTML<^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")>
-	&HTML<^SYS("SourceControl","#(..#PRODUCT)#","Src")>
+	&HTML<^ZScc("#(..#PRODUCT)#","LocalWorkspaceRoot")>
+	&HTML<^ZScc("#(..#PRODUCT)#","Src")>
 
 	&HTML<<br/>>
 	&HTML<[現在の設定]>
-	&HTML<^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")=#($G(^SYS("SourceControl",..#PRODUCT,"LocalWorkspaceRoot")))#>
-	&HTML<^SYS("SourceControl","#(..#PRODUCT)#","Src")=#($G(^SYS("SourceControl",..#PRODUCT,"Src")))#>
+	&HTML<^ZScc("#(..#PRODUCT)#","LocalWorkspaceRoot")=#($G(^ZScc(..#PRODUCT,"LocalWorkspaceRoot")))#>
+	&HTML<^ZScc("#(..#PRODUCT)#","Src")=#($G(^ZScc(..#PRODUCT,"Src")))#>
 
 	&HTML<<br/>>
 	&HTML<[設定例]>
-	&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","Debug")=0>
+	&HTML<Set ^ZScc("#(..#PRODUCT)#","Debug")=0>
 	If $$$ISWINDOWS {
-		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="c:\var\basic\Project_XYZ\">
+		&HTML<Set ^ZScc("#(..#PRODUCT)#","LocalWorkspaceRoot")="c:\var\basic\Project_XYZ\">
 	}
 	Else {
-		&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","LocalWorkspaceRoot")="/home/irisusr/basic/Project_XYZ/">
+		&HTML<Set ^ZScc("#(..#PRODUCT)#","LocalWorkspaceRoot")="/home/irisusr/basic/Project_XYZ/">
 	}
-	&HTML<Set ^SYS("SourceControl","#(..#PRODUCT)#","Src")="src">
+	&HTML<Set ^ZScc("#(..#PRODUCT)#","Src")="src">
 	&HTML<</PRE>>
 	&HTML<設定例の値を使用するならボタンを押してください。押下後、スタジオを再起動してください。>
 	&HTML<<input id="btn" name="btn" type="button" value="設定例の値で初期化" onClick='onServer()'>>

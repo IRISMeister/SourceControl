@@ -1,9 +1,9 @@
 # SourceControl
-WIP.DO NOT USE YET.  
 IRIS用ソースコントロールフック
 
 ## 導入方法
 1. Linuxであればaptやyumで、Windowsであれば、git for windowsをインストールします。
+Windowsの場合、git.exeにPATHを通す選択(Use Git from the Windows Command Promp)をしてください。
 2. IRISのソースコード一式をインポートします。
 ```bash
 $ git clone https://github.com/IRISMeister/SourceControl.git
@@ -63,8 +63,8 @@ Linuxと異なり、Widnowsはファイル名の大文字小文字の区別を�
 |||自動コミットを無効化|保存時にgit commitを実行しません|
 |commit||コミット実行|明示的にgit commitを実行します|
 |checkout HEAD||チェックアウト|表示中のドキュメントをHEADからgit checkoutします|
-|pull||リモートからプル||
-|push||リモートにプッシュ||
+|pull||リモートからプル|使用は非推奨|
+|push||リモートにプッシュ|使用は非推奨|
 |status||ステータス表示||
 |status --verbose||ステータス表示(verbose)||
 |status||現在のアイテムのステータス表示(verbose)|表示中のドキュメントに対してgit status実行|
@@ -80,15 +80,43 @@ Linuxと異なり、Widnowsはファイル名の大文字小文字の区別を�
 1. %ZScc.Basic
 ```ObjectScript
 Set $NAMESPACE="APP"
-^SYS("SourceControl","Basic","LocalWorkspaceRoot")="c:\var\basic\Project_XYZ\"
-^SYS("SourceControl","Basic","Src")="src"
+^ZScc("Basic","LocalWorkspaceRoot")="c:\var\basic\Project_XYZ\"
+^ZScc("Basic","Src")="src"
 ```
 
-1. %ZScc.Git
+2. %ZScc.Git
 ```ObjectScript
 Set $NAMESPACE="APP"
-^SYS("SourceControl","GIT","LocalWorkspaceRoot")="c:\var\git\Project_XYZ\"
-^SYS("SourceControl","GIT","MainCommand")="git"
-^SYS("SourceControl","GIT","Src")="src"
+^ZScc("GIT","LocalWorkspaceRoot")="c:\var\git\Project_XYZ\"
+^ZScc("GIT","Src")="src"
 ```
 
+これらの設定とワークディレクトリの関係
+- LocalWorkspaceRootの値が"C:\git\basic\Project_XYZ\"
+- Srcの値が"src"  
+である場合、下記のようなワークディレクトリ構造を作成します。
+```
+C:\var\git\Project_XYZ     ここにローカルレポジトリ(.gitフォルダ)が存在。
+C:\var\git\Project_XYZ\... ここにIRISと直接関係のないファイルを配置
+C:\var\git\Project_XYZ\src ここにIRIS関連ファイル(cls, mac, incなど)を配置
+```
+
+|第1ノード|第2ノード|用途・補足|省略時値|
+|:--|:--|:--|:--|
+|Basic,GIT|LocalWorkspaceRoot|ワークディレクトリの場所|省略不可|
+|Basic,GIT|Src|IRIS関連のソースコード保存ディレクトリ名|省略不可|
+|Basic,GIT|Debug|Debug情報を表示するかどうかのフラグ|0:表示しない|
+|GIT|AutoCreateRepo|スタジオ起動時に、指定されたワークディレクトリがgit initされていない場合に、git initを実行するかどうかのフラグ|0:しない|
+|GIT|AutoCommit|コミットを自動実行するかどうかのフラグ|0:しない|
+|GIT|MainCommand|git実行イメージのパス|git|
+|GIT|RemoteUser|リモートレポジトリをアクセスする際のユーザ名|なし|
+|GIT|RemotePassword|リモートレポジトリをアクセスする際のパスワード|なし|
+|GIT|RemoteRepository|リモートレポジトリのURL|なし|
+
+AutoCreateRepoが1に設定されていると、先ほどの例でC:\var\git\Project_XYZ に、.gitフォルダが存在するかどうかを確認し、無ければ下記の一連の初期化コマンドを実行します。
+```
+git init
+git config user.email xxx@yyy
+git config user.name xxx
+```
+実装は%ZScc.GIT:InitDir()にありますので、適宜修正してください。

@@ -15,7 +15,7 @@ Property Repository As %String(MAXLEN = 250);
 /// revision number, leave empty for LATEST
 Property Revision As %String;
 
-Property Command As %String(MAXLEN = 500) [ InitialExpression = {$g(^SYS("SourceControl",..#PRODUCT,"MainCommand"),"svn")} ];
+Property Command As %String(MAXLEN = 500) [ InitialExpression = {$g(^ZScc(..#PRODUCT,"MainCommand"),"git")} ];
 
 Property Branch As %String;
 
@@ -63,7 +63,7 @@ Method %OnNew(initvalue As %CacheString) As %Status [ Private, ProcedureBlock = 
 
 Method LogGet() As %Boolean [ CodeMode = expression ]
 {
-$g(^SYS("SourceControl",..#PRODUCT,"CommandLog"))
+$g(^ZScc(..#PRODUCT,"CommandLog"))
 }
 
 /// This callback method is invoked by the <METHOD>%Save</METHOD> method to 
