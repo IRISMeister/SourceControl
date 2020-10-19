@@ -94,7 +94,7 @@ ClassMethod ExportProjectItems(ProjectName As %String, Directory As %String = ""
 	Else {
 		W $$$MSGNODEFAULTPRJ,!
 	}
-	W "Exported ",cnt," items",!
+	W "ExportProjectItems:Exported items: ",cnt,!
 
 	Quit $$$OK
 }
@@ -157,7 +157,7 @@ ClassMethod ExportAllItems(Directory As %String = "", Debug = 0) As %Status
 			If extName'="" { Set cnt=cnt+1 }
 		}
 	}
-	W "Exported ",cnt," items",!
+	W "ExportAllItems:Exported items:",cnt,!
 	Quit $$$OK
 }
 
