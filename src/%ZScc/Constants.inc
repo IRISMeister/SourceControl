@@ -45,8 +45,9 @@ ROUTINE %ZScc.Constants [Type=INC]
 #DEFINE MENUPUSH "Push to remote"
  */
 #DEFINE MENUSETTINGS "設定"
-#DEFINE MENUADDPJ "プロジェクトをレポジトリに追加"
-#DEFINE MENUADDNS "ネームスペースをレポジトリに追加"
+#DEFINE MENUADDPJ "プロジェクトをワークに追加"
+#DEFINE MENUADDNS "ネームスペースをワークに追加"
+#DEFINE MENUADD1 "現在のアイテムをワークに追加"
 #DEFINE MENUCOPYTRUNK "trunkを指定のTAGにコピー"
 #DEFINE MENUCHECKOUT "レポジトリからワークに全てのアイテムをチェックアウト"
 #DEFINE MENUCHECKOUT1 "チェックアウト"
@@ -70,8 +71,11 @@ ROUTINE %ZScc.Constants [Type=INC]
 #DEFINE USERACTMSGCO "レポジトリからワークに全てのアイテムをチェックアウトします。実行しますか？"
 #DEFINE USERACTMSGCO1 "ワークに現在のアイテムをチェックアウトします。実行しますか？"
 #DEFINE USERACTMSGCO2 "ブランチを切り替えます。実行しますか？"
-#DEFINE USERACTMSGIMPORTALL "ワークの全内容をロードします。レポジトリに影響は与えません。"_$C(13,10)_"実行しますか？"
-#DEFINE USERACTMSGIMPORT1 "選択中の項目のみをワークからロードします。レポジトリに影響は与えません。"_$C(13,10)_"実行しますか？"
+#DEFINE USERACTMSGADDNS "ネームスペースの全内容をエクスポートします。"_$C(13,10)_"実行しますか？"
+#DEFINE USERACTMSGADDPJ "現在のプロジェクトの内容をエクスポートします。"_$C(13,10)_"実行しますか？"
+#DEFINE USERACTMSGADD1 "選択中の項目のみをエクスポートします。"_$C(13,10)_"実行しますか？"
+#DEFINE USERACTMSGIMPORTALL "ワークの全内容をロードします。"_$C(13,10)_"実行しますか？"
+#DEFINE USERACTMSGIMPORT1 "選択中の項目のみをワークからロードします。"_$C(13,10)_"実行しますか？"
 #DEFINE USERACTMSGCOMMITON "自動コミットを有効にしました。"
 #DEFINE USERACTMSGCOMMITOFF "自動コミットを無効にしました。保存時にコミットされなくなります。明示的にコミットを実行してください。"
 #DEFINE USERACTMSGSTATUS1 "アイテムが選択されていません。"
@@ -82,6 +86,7 @@ ROUTINE %ZScc.Constants [Type=INC]
 
 #DEFINE USERACTMSGEXPORTALLDONE "ネームスペースの内容をワークディレクトリに出力しました。"
 #DEFINE USERACTMSGEXPORTPRJDONE "プロジェクトの内容をワークディレクトリに出力しました。"
+#DEFINE USERACTMSGEXPORT1DONE "現在の内容をワークディレクトリに出力しました。"
 
  //#DEFINE MSGNODEFAULTPRJ "Warning !!! Default project will not be source controled."
 #DEFINE MSGNODEFAULTPRJ "デフォルトプロジェクトはソース管理の対象になりません。"

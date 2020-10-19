@@ -115,7 +115,7 @@ ClassMethod ExportAllItems(Directory As %String = "", Debug = 0) As %Status
 		If $ZCVT($P(db,$$$FolderDelimiter,$L(db,$$$FolderDelimiter)-1),"U")'=$NAMESPACE Continue
 
 		Set extName=##class(%ZScc.Utils).ExportSingleItem(tInternalName,Directory,Debug)
-		If extName'="" { Set cnt=cnt+1 w extName,!}
+		If extName'="" { Set cnt=cnt+1 }
 	}
 	
 	#;classes

@@ -50,6 +50,7 @@ XData Menu
 <MenuItem Separator="1"/> 
 <MenuItem Name="addpj" />
 <MenuItem Name="addns" />
+<MenuItem Name="add1" />
 <MenuItem Name="importall" />
 <MenuItem Name="import1" />
 <MenuItem Separator="1"/> 
@@ -117,11 +118,14 @@ Method UserAction(Type As %Integer, Name As %String, InternalName As %String, Se
 			set Action=$$$ACTIONRUNCSP
 			Set Target=$system.CSP.GetDefaultApp($NAMESPACE)_"/%25ZScc.ui."_$Parameter(,"PRODUCT")_".Setting.cls"			
 		} elseif menuID="addpj" {
-			set Action=$$$ACTIONDONOTHING
-			Do ..AddProjectItems()
+			set Action=$$$ACTIONSIMPLEDIALOG
+			set Target=$$$USERACTMSGADDPJ
 		} elseif menuID="addns" {
-			set Action=$$$ACTIONDONOTHING
-			Do ..AddNameSpaceItems()
+			set Action=$$$ACTIONSIMPLEDIALOG
+			set Target=$$$USERACTMSGADDNS
+		} elseif menuID="add1" {
+			set Action=$$$ACTIONSIMPLEDIALOG
+			set Target=$$$USERACTMSGADD1
 		} elseif menuID="checkout" {
 			set Action=$$$ACTIONSIMPLEDIALOG
 			set Target=$$$USERACTMSGCO
@@ -295,6 +299,23 @@ Method AfterUserAction(Type As %Integer, Name As %String, InternalName As %Strin
 				W $$$USERACTMSGSTATUS1,!
 			}
 		}
+		ElseIf menuID="addns" { 
+			If Answer'=$$$YES Quit $$$OK
+			Do ..AddNameSpaceItems()
+		}
+		ElseIf menuID="addpj" { 
+			If Answer'=$$$YES Quit $$$OK
+			Do ..AddProjectItems()
+		}
+		ElseIf menuID="add1" { //
+			If Answer'=$$$YES Quit $$$OK
+			If InternalName'="" {
+				Do ..Add1Item(InternalName)
+			}
+			Else {
+				w $$$USERACTMSGSTATUS1,!
+			}
+		}
 	}
 
 	Quit $$$OK
@@ -332,6 +353,17 @@ Method AddNameSpaceItems() As %Status
 	Do ##class(%ZScc.Utils).ExportAllItems(path,..Debug)
 	W $$$USERACTMSGEXPORTALLDONE,!
 	Quit $$$OK
+}
+
+Method Add1Item(InternalName As %String) As %Status
+{
+	if ..Debug Write "Add1Item.  Target:",..CurrentProjectName,!
+	If '..IsInitialized  Quit '$$$OK
+
+	Set path=..GetLocalWorkspacePath()
+	Set tSC=##class(%ZScc.Utils).ExportSingleItem(InternalName,path,..Debug)
+	w $$$USERACTMSGEXPORT1DONE,!
+	Quit tSC
 }
 
 Method OnMenuItem(MenuName As %String, InternalName As %String, SelectedText As %String, ByRef Enabled As %Boolean, ByRef DisplayName As %String) As %Status
@@ -406,6 +438,7 @@ Method TranslateMenuNameToMenuID(Name As %String, ByRef DisplayName As %String) 
 	If tMenu="settings" {Set DisplayName=$$$MENUSETTINGS}
 	ElseIf tMenu="addpj" {Set DisplayName=$$$MENUADDPJ}
 	ElseIf tMenu="addns" {Set DisplayName=$$$MENUADDNS }
+	ElseIf tMenu="add1" {Set DisplayName=$$$MENUADD1 }
 	ElseIf tMenu="copytrunk" {Set DisplayName=$$$MENUCOPYTRUNK }
 	ElseIf tMenu="checkout" {Set DisplayName=$$$MENUCHECKOUT   }
 	ElseIf tMenu="checkout1" {Set DisplayName=$$$MENUCHECKOUT1   }
