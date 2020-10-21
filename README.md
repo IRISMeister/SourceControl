@@ -20,18 +20,18 @@ Windows
 %SYS>d $SYSTEM.OBJ.ImportDir("c:\temp\SourceControl\src","*","ck",,1)
 ```
 
-ソースコード管理の設定画面は下記のようにCSPページにアクセスします。
+ソースコード管理の設定画面は下記のロジックで設定画面用CSPページのURLを決定します。
 ```ObjectScript
-	Set Target=$system.CSP.GetDefaultApp($NAMESPACE)_"/%25ZScc.ui."_$Parameter(,"PRODUCT")_".Setting.cls"			
+$system.CSP.GetDefaultApp($NAMESPACE)_"/%25ZScc.ui."_$Parameter(,"PRODUCT")_".Setting.cls"
 ```
-例えばネームスペースMYAPPに/csp/myappが存在しない、もしくは存在してもRESTアクセス用であった場合、設定画面の表示に失敗します。設定画面の表示は必須ではありませんので、その場合、直接グローバルへの設定を行ってください。
+例えばこのURLは/csp/myapp/%25ZScc.ui.GIT.Settings.clsなどになりますが、ネームスペースMYAPPに/csp/myappアプリケーションが存在しない、もしくは存在してもRESTアクセス用であった場合、設定画面の表示に失敗します。設定画面の表示は必須ではありませんので、その場合、後述の^ZSccグローバルを直接セッしてください。
 
 ## 提供される機能
 2種類のソースコントロールフックを提供します。
 1. %ZScc.Basic
 - ソースコードの保存時にその内容を指定したワークディレクトリにUDL形式で出力します。 
 - パッケージ名をフォルダ構造に展開します。
-- ネームスペース内のソースコード、スタジオプロジェクトに追加された項目をワークディレクトリにエクスポートします。
+- ネームスペース内の全てのソースコードやスタジオプロジェクトに追加されている項目をワークディレクトリにエクスポートします。
 - ワークディレクトリの内容をインポートします。
 - MAC, INT, INC, CLS, PRJ, BPM, DTLを識別します。
 -  各種メニューを提供します。
@@ -46,7 +46,6 @@ Windows
 |import1|ワークから現在のアイテムをインポート|表示中のドキュメントをIRISにインポート|
 |dump|設定のダンプ|設定内容をダンプ|
 
-
 - 補足  
 エクスポートには$System.OBJ.ExportUDL(,,"/diffexport/nodisplaylog")を使用します。実装は%ZScc.Utils:ExportSingleItem()を参照ください。
 修飾子の意味は[こちら](https://docs.intersystems.com/iris20201/csp/docbookj/DocBook.UI.Page.cls?KEY=RCOS_vsystem)を参照ください。  
@@ -56,7 +55,7 @@ Linuxと異なり、Widnowsはファイル名の大文字小文字の区別を�
 
 2. %ZScc.Git
  %ZScc.Basicに加えて、各種gitコマンドを発行するメニューを提供します。
- >本機能はスタジオ経由で完全なgit機能を提供することを目的としていません。補助的な役割に徹しています。特にブランチ切り替えやコンフリクトの解消などの操作は、コマンドラインや専用ツールとの併用が必要になります。より透過的なソースコード管理機能が必要な場合はVSCodeやOpenExchangeの[ツール](https://openexchange.intersystems.com/package/Cach%C3%A9-Tortoize-Git)の使用をご検討ください。
+ >本機能はスタジオ経由で完全なgit機能を提供することを目的としていません。VSCodeとの併用を前提とした補助的な役割に徹しています。ブランチ切り替えやコンフリクトの解消などの操作は、コマンドラインやVSCodeとの併用が必要になります。より透過的なソースコード管理機能が必要な場合は、OpenExchangeの[ツール](https://openexchange.intersystems.com/package/Cach%C3%A9-Tortoize-Git)の使用をご検討ください。
 
 |gitコマンド|メニューアイテム名|メニュー表示|用途・補足|
 |:--|:--|:--|:--|
@@ -80,16 +79,16 @@ Linuxと異なり、Widnowsはファイル名の大文字小文字の区別を�
 以下は、最低限必要な設定となります。
 1. %ZScc.Basic
 ```ObjectScript
-Set $NAMESPACE="APP"
-^ZScc("Basic","LocalWorkspaceRoot")="c:\var\basic\Project_XYZ\"
-^ZScc("Basic","Src")="src"
+Set $NAMESPACE="MYAPP"
+Set ^ZScc("Basic","LocalWorkspaceRoot")="c:\var\basic\Project_XYZ\"
+Set ^ZScc("Basic","Src")="src"
 ```
 
 2. %ZScc.Git
 ```ObjectScript
-Set $NAMESPACE="APP"
-^ZScc("GIT","LocalWorkspaceRoot")="c:\var\git\Project_XYZ\"
-^ZScc("GIT","Src")="src"
+Set $NAMESPACE="MYAPP"
+Set ^ZScc("GIT","LocalWorkspaceRoot")="c:\var\git\Project_XYZ\"
+Set ^ZScc("GIT","Src")="src"
 ```
 
 これらの設定とワークディレクトリの関係
@@ -101,7 +100,7 @@ C:\var\git\Project_XYZ     ここにローカルレポジトリ(.gitフォルダ
 C:\var\git\Project_XYZ\... ここにIRISと直接関係のないファイルを配置
 C:\var\git\Project_XYZ\src ここにIRIS関連ファイル(cls, mac, incなど)を配置
 ```
-
+その他の設定可能な項目は下記の通りです。
 |第1ノード|第2ノード|用途・補足|省略時値|
 |:--|:--|:--|:--|
 |Basic,GIT|LocalWorkspaceRoot|ワークディレクトリの場所|省略不可|
@@ -113,8 +112,12 @@ C:\var\git\Project_XYZ\src ここにIRIS関連ファイル(cls, mac, incなど)�
 |GIT|RemoteUser|リモートレポジトリをアクセスする際のユーザ名|なし|
 |GIT|RemotePassword|リモートレポジトリをアクセスする際のパスワード|なし|
 |GIT|RemoteRepository|リモートレポジトリのURL|なし|
-
-AutoCreateRepoが1に設定されていると、先ほどの例でC:\var\git\Project_XYZ に、.gitフォルダが存在するかどうかを確認し、無ければ下記の一連の初期化コマンドを実行します。
+例えば、コミットを自動実行する場合、下記を実行してください。
+```ObjectScript
+Set $NAMESPACE="MYAPP"
+Set ^ZScc("GIT","AutoCommit")=1
+```
+AutoCreateRepoが1に設定されていると、先ほどのワークディレクトリ構造の例でC:\var\git\Project_XYZ に、.gitフォルダが存在するかどうかを、ネームスペースへの接続時に確認し、無ければ下記の一連の初期化コマンドを自動実行します。
 ```
 git init
 git config user.email xxx@yyy
