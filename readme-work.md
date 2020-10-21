@@ -4,7 +4,7 @@ WIP
 そのため、今までの集中型、オンサイトの開発体制を見直し、分散型の開発体制への移行を迫られているユーザさんも多いのではないかと思います。
 VSCodeを使用したIRISアプリケーションの開発が、コミュニティーを中心に広まり始めて久しいですが、Gitとの相性が良いこの開発ツールが今後さらに浸透していくことは間違いありません。あちらこちらで、その使いまわし方が語られていますが、日本語でのご紹介が少なかったように思いますので、ここでは、ソースコントロールとの関連を中心にご紹介したいと思います。
 
->　間の良いことに、VSCode InterSystems ObjectScript Extensionのプロダクションリリース(V1.0.x)の配布が始まりました。  
+> 間の良いことに、VSCode InterSystems ObjectScript Extensionのプロダクションリリース(V1.0.x)の配布が始まりました。  
 > https://community.intersystems.com/post/objectscript-extension-vs-code-reaches-10  
 > これに合わせて、今までのコミュニティーサポートに加え、InterSystemsによる公式サポートもアナウンスされています。
 
